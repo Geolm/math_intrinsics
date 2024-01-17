@@ -85,3 +85,7 @@ float32x4_t vcbrtq_f32(float32x4_t a);
 
 [cephes math library](https://github.com/jeremybarnes/cephes/blob/master/single/)
 
+[simple SSE sin/cos](http://gruntthepeon.free.fr/ssemath/)
+
+[speeding up atan2f by 50x](https://mazzo.li/posts/vectorized-atan2.html)
+
