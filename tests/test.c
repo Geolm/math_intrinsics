@@ -78,11 +78,11 @@ TEST generic_test(reference_function ref, approximation_function approx, float r
 
     printf("%s max error : %.*e\n", name, FLT_DECIMAL_DIG, vmaxvq_f32(v_max_error));
 #endif
-    
-    PASS();
 
     free(input);
     free(result);
+    
+    PASS();
 }
 
 float atan2_xy(float x, float y) {return atan2f(y, x);}
