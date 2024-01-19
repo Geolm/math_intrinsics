@@ -52,34 +52,34 @@ extern "C" {
 #include <immintrin.h>
 
     // max error : 5.960464478e-08
-    __m256 _mm256_cos_ps(__m256 a);
+    __m256 mm256_cos_ps(__m256 a);
 
     // max error : 5.960464478e-08
-    __m256 _mm256_sin_ps(__m256 a);
+    __m256 mm256_sin_ps(__m256 a);
 
     // max error : 5.960464478e-08
-    void _mm256_sincos_ps(__m256 a, __m256 *s, __m256 *c);
+    void mm256_sincos_ps(__m256 a, __m256 *s, __m256 *c);
 
     // max error : 2.384185791e-07
-    __m256 _mm256_acos_ps(__m256 a);
+    __m256 mm256_acos_ps(__m256 a);
 
     // max error : 1.192092896e-07
-    __m256 _mm256_asin_ps(__m256 a);
+    __m256 mm256_asin_ps(__m256 a);
 
     // max error : 6.699562073e-05
-    __m256 _mm256_atan_ps(__m256 a);
+    __m256 mm256_atan_ps(__m256 a);
 
     // max error : 2.384185791e-07
-    __m256 _mm256_atan2_ps(__m256 x, __m256 y);
+    __m256 mm256_atan2_ps(__m256 x, __m256 y);
 
     // max error : 4.768371582e-07
-    __m256 _mm256_log_ps(__m256 a);
+    __m256 mm256_log_ps(__m256 a);
 
     // max error : 1.108270880e-07
-    __m256 _mm256_exp_ps(__m256 a);
+    __m256 mm256_exp_ps(__m256 a);
 
     // max error : 4.768371582e-07
-    __m256 _mm256_cbrt_ps(__m256 a);
+    __m256 mm256_cbrt_ps(__m256 a);
 
     #define __MATH__INTRINSICS__AVX__
 
@@ -211,9 +211,9 @@ extern "C" {
     static inline simd_vectori simd_cmp_eq_i(simd_vectori a, simd_vectori b) {return _mm256_cmpeq_epi32(a, b);}
     static inline simd_vectori simd_cmp_gt_i(simd_vectori a, simd_vectori b) {return _mm256_cmpgt_epi32(a, b);}
 
-    #define simd_asin _mm256_asin_ps
-    #define simd_atan _mm256_atan_ps
-    #define simd_sincos _mm256_sincos_ps
+    #define simd_asin mm256_asin_ps
+    #define simd_atan mm256_atan_ps
+    #define simd_sincos mm256_sincos_ps
 
 #endif
 
@@ -255,7 +255,7 @@ static inline simd_vector simd_sign(simd_vector a)
 #ifdef __MATH__INTRINSICS__NEON__
     float32x4_t vatanq_f32(float32x4_t xx)
 #else
-    __m256 _mm256_atan_ps(__m256 xx)
+    __m256 mm256_atan_ps(__m256 xx)
 #endif
 {	
 	simd_vector sign = simd_sign(xx);
@@ -289,7 +289,7 @@ static inline simd_vector simd_sign(simd_vector a)
 #ifdef __MATH__INTRINSICS__NEON__
     float32x4_t vatan2q_f32(float32x4_t x, float32x4_t y)
 #else
-    __m256 _mm256_atan2_ps(__m256 x, __m256 y)
+    __m256 mm256_atan2_ps(__m256 x, __m256 y)
 #endif
 {
     simd_vector swap = simd_cmp_lt(simd_abs(x), simd_abs(y));
@@ -310,7 +310,7 @@ static inline simd_vector simd_sign(simd_vector a)
 #ifdef __MATH__INTRINSICS__NEON__
     float32x4_t vlogq_f32(float32x4_t x)
 #else
-    __m256 _mm256_log_ps(__m256 x)
+    __m256 mm256_log_ps(__m256 x)
 #endif
 {
     simd_vector one = simd_splat(1.f);
@@ -364,7 +364,7 @@ static inline simd_vector simd_sign(simd_vector a)
 #ifdef __MATH__INTRINSICS__NEON__
     float32x4_t vexpq_f32(float32x4_t x)
 #else
-    __m256 _mm256_exp_ps(__m256 x)
+    __m256 mm256_exp_ps(__m256 x)
 #endif
 {
     simd_vector tmp = simd_splat_zero();
@@ -411,7 +411,7 @@ static inline simd_vector simd_sign(simd_vector a)
 #ifdef __MATH__INTRINSICS__NEON__
     void vsincosq_f32(float32x4_t x, float32x4_t* s, float32x4_t* c)
 #else
-    void _mm256_sincos_ps(__m256 x, __m256* s, __m256* c)
+    void mm256_sincos_ps(__m256 x, __m256* s, __m256* c)
 #endif
 {
     simd_vector xmm1, xmm2, xmm3 = simd_splat_zero(), sign_bit_sin, y;
@@ -497,7 +497,7 @@ static inline simd_vector simd_sign(simd_vector a)
 #ifdef __MATH__INTRINSICS__NEON__
 float32x4_t vsinq_f32(float32x4_t x)
 #else
-__m256 _mm256_sin_ps(__m256 x)
+__m256 mm256_sin_ps(__m256 x)
 #endif
 {
     simd_vector sinus, cosinus;
@@ -509,7 +509,7 @@ __m256 _mm256_sin_ps(__m256 x)
 #ifdef __MATH__INTRINSICS__NEON__
 float32x4_t vcosq_f32(float32x4_t x)
 #else
-__m256 _mm256_cos_ps(__m256 x)
+__m256 mm256_cos_ps(__m256 x)
 #endif
 {
     simd_vector sinus, cosinus;
@@ -522,7 +522,7 @@ __m256 _mm256_cos_ps(__m256 x)
 #ifdef __MATH__INTRINSICS__NEON__
     float32x4_t vasinq_f32(float32x4_t xx)
 #else
-    __m256 _mm256_asin_ps(__m256 xx)
+    __m256 mm256_asin_ps(__m256 xx)
 #endif
 {
     simd_vector x = xx;
@@ -560,7 +560,7 @@ __m256 _mm256_cos_ps(__m256 x)
 #ifdef __MATH__INTRINSICS__NEON__
     float32x4_t vacosq_f32(float32x4_t x)
 #else
-    __m256 _mm256_acos_ps(__m256 x)
+    __m256 mm256_acos_ps(__m256 x)
 #endif
 {
     simd_vector out_of_bound = simd_cmp_gt(simd_abs(x), simd_splat(1.f));
@@ -574,7 +574,7 @@ __m256 _mm256_cos_ps(__m256 x)
 #ifdef __MATH__INTRINSICS__NEON__
     float32x4_t vcbrtq_f32(float32x4_t xx)
 #else
-    __m256 _mm256_cbrt_ps(__m256 xx)
+    __m256 mm256_cbrt_ps(__m256 xx)
 #endif
 {
     simd_vector one_over_three = simd_splat(0.333333333333f);

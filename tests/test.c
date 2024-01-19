@@ -92,11 +92,11 @@ SUITE(trigonometry)
     printf(".");
 
 #ifdef __MATH__INTRINSICS__AVX__
-    RUN_TESTp(generic_test, sinf, _mm256_sin_ps, -10.f, 10.f, FLT_EPSILON, 1024, false, "_mm256_sin_ps");
-    RUN_TESTp(generic_test, cosf, _mm256_cos_ps, -10.f, 10.f, FLT_EPSILON, 1024, false, "_mm256_cos_ps");
-    RUN_TESTp(generic_test, acosf, _mm256_acos_ps, -1.f, 1.f, 1.e-06f, 1024, false, "_mm256_acos_ps");
-    RUN_TESTp(generic_test, asinf, _mm256_asin_ps, -1.f, 1.f, 1.e-06f, 1024, false, "_mm256_asin_ps");
-    RUN_TESTp(generic_test, atanf, _mm256_atan_ps, -10.f, 10.f, 1.e-04f, 1024, false, "_mm256_atan_ps");
+    RUN_TESTp(generic_test, sinf, mm256_sin_ps, -10.f, 10.f, FLT_EPSILON, 1024, false, "mm256_sin_ps");
+    RUN_TESTp(generic_test, cosf, mm256_cos_ps, -10.f, 10.f, FLT_EPSILON, 1024, false, "mm256_cos_ps");
+    RUN_TESTp(generic_test, acosf, mm256_acos_ps, -1.f, 1.f, 1.e-06f, 1024, false, "mm256_acos_ps");
+    RUN_TESTp(generic_test, asinf, mm256_asin_ps, -1.f, 1.f, 1.e-06f, 1024, false, "mm256_asin_ps");
+    RUN_TESTp(generic_test, atanf, mm256_atan_ps, -10.f, 10.f, 1.e-04f, 1024, false, "mm256_atan_ps");
     //RUN_TESTp(generic_test2, atan2_xy, simd_atan2, 1.e-06f, 1024, false, "simd_atan2");
 #else
     RUN_TESTp(generic_test, sinf, vsinq_f32, -10.f, 10.f, FLT_EPSILON, 1024, false, "vsinq_f32");
