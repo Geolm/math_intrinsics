@@ -88,7 +88,58 @@
 
 #if defined(__ARM_NEON) && defined(__ARM_NEON__)
     #define __MATH__INTRINSICS__NEON__
+    typedef float32x4_t simd_vector;
 
+    static inline simd_vector simd_add(simd_vector a, simd_vector b) {return vaddq_f32(a, b);}
+    static inline simd_vector simd_sub(simd_vector a, simd_vector b) {return vsubq_f32(a, b);}
+    static inline simd_vector simd_mul(simd_vector a, simd_vector b) {return vmulq_f32(a, b);}
+    static inline simd_vector simd_div(simd_vector a, simd_vector b) {return vdivq_f32(a, b);}
+    static inline simd_vector simd_abs(simd_vector a) {return vabsq_f32(a);}
+    static inline simd_vector simd_fmad(simd_vector a, simd_vector b, simd_vector c) {return vfmaq_f32(c, a, b);}
+    static inline simd_vector simd_or(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(vorrq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));}
+    static inline simd_vector simd_xor(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(veorq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));}
+    static inline simd_vector simd_and(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(vandq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));}
+    static inline simd_vector simd_andnot(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));}
+    static inline simd_vector simd_min(simd_vector a, simd_vector b) {return vminq_f32(a, b);}
+    static inline simd_vector simd_max(simd_vector a, simd_vector b) {return vmaxq_f32(a, b);}
+    static inline simd_vector simd_cmp_gt(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(vcgtq_f32(a, b));}
+    static inline simd_vector simd_cmp_ge(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(vcgeq_f32(a, b));}
+    static inline simd_vector simd_cmp_lt(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(vcltq_f32(a, b));}
+    static inline simd_vector simd_cmp_le(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(vcleq_f32(a, b));}
+    static inline simd_vector simd_cmp_eq(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(vceqq_f32(a, b));}
+    static inline simd_vector simd_select(simd_vector a, simd_vector b, simd_vector mask) {return vbslq_f32(vreinterpretq_u32_f32(mask), b, a);}
+    static inline simd_vector simd_splat(float value) {return vdupq_n_f32(value);}
+    static inline simd_vector simd_splat_zero(void) {return vdupq_n_f32(0);}
+    static inline simd_vector simd_sign_mask(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0x80000000));}
+    static inline simd_vector simd_inv_sign_mask(void) {return vreinterpretq_u32_f32(vdupq_n_u32(~0x80000000));}
+    static inline simd_vector simd_abs_mask(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0x7FFFFFFF));}
+    static inline simd_vector simd_min_normalized(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0x00800000));} // the smallest non denormalized float number
+    static inline simd_vector simd_inv_mant_mask(void){return vreinterpretq_u32_f32(vdupq_n_u32(~0x7f800000));}
+    static inline simd_vector simd_mant_mask(void){return vreinterpretq_u32_f32(vdupq_n_u32(0x7f800000));}
+    static inline simd_vector simd_floor(simd_vector a) {return vrndmq_f32(a);}
+    static inline simd_vector simd_neg(simd_vector a) {return vnegq_f32(a);}
+    static inline simd_vector simd_sqrt(simd_vector a) {return vsqrtq_f32(a);}
+    static inline simd_vector simd_rcp(simd_vector a) {simd_vector out = vrecpeq_f32(a); return vmulq_f32(out, vrecpsq_f32(out, a));}
+
+    typedef int32x4_t simd_vectori;
+    static inline simd_vectori simd_convert_from_float(simd_vector a) {return vreinterpretq_s32_f32(a);}
+    static inline simd_vectori simd_cast_from_float(simd_vector a) {return vcvtq_s32_f32(a);}
+    static inline simd_vector simd_convert_from_int(simd_vectori a) {return vreinterpretq_f32_s32(a);}
+    static inline simd_vector simd_cast_from_int(simd_vectori a) {return vcvtq_f32_s32(a);}
+    static inline simd_vectori simd_add_i(simd_vectori a, simd_vectori b) {return vaddq_s32(a, b);}
+    static inline simd_vectori simd_sub_i(simd_vectori a, simd_vectori b) {return vsubq_s32(a, b);}
+    static inline simd_vectori simd_splat_i(int i) {return vdupq_n_s32(i);}
+    static inline simd_vectori simd_splat_zero_i(void) {return vdupq_n_s32(0);}
+    static inline simd_vectori simd_shift_left_i(simd_vectori a, int i) {return vshlq_s32(a, vdupq_n_s32(i));}
+    static inline simd_vectori simd_shift_right_i(simd_vectori a, int i) {return vshlq_s32(a, vdupq_n_s32(-i));}
+    static inline simd_vectori simd_and_i(simd_vectori a, simd_vectori b) {return vandq_s32(a, b);}
+    static inline simd_vectori simd_or_i(simd_vectori a, simd_vectori b) {return vorrq_s32(a, b);}
+    static inline simd_vectori simd_andnot_i(simd_vectori a, simd_vectori b) {return vbicq_s32(a, b);}
+    static inline simd_vectori simd_cmp_eq_i(simd_vectori a, simd_vectori b) {return vceqq_s32(a, b);}
+    static inline simd_vectori simd_cmp_gt_i(simd_vectori a, simd_vectori b) {return vcgtq_s32(a, b);}
+
+    #define simd_asin vasinq_f32
+    #define simd_atan vatanq_f32
 
 #else
     #define __MATH__INTRINSICS__AVX__
@@ -128,6 +179,9 @@
     static inline simd_vector simd_cmp_lt(simd_vector a, simd_vector b) {return _mm256_cmp_ps(a, b, _CMP_LT_OQ);}
     static inline simd_vector simd_cmp_le(simd_vector a, simd_vector b) {return _mm256_cmp_ps(a, b, _CMP_LE_OQ);}
     static inline simd_vector simd_cmp_eq(simd_vector a, simd_vector b) {return _mm256_cmp_ps(a, b, _CMP_EQ_OQ);}
+    static inline simd_vector simd_sqrt(simd_vector a) {return _mm256_sqrt_ps(a);}
+    static inline simd_vector simd_neg(simd_vector a) {return _mm256_sub_ps(_mm256_setzero_ps(), a);}
+    static inline simd_vector simd_rcp(simd_vector a) {return _mm256_rcp_ps(a);}
 
 
     typedef __m256i simd_vectori;
@@ -146,6 +200,9 @@
     static inline simd_vectori simd_andnot_i(simd_vectori a, simd_vectori b) {return _mm256_andnot_si256(b, a);}
     static inline simd_vectori simd_cmp_eq_i(simd_vectori a, simd_vectori b) {return _mm256_cmpeq_epi32(a, b);}
     static inline simd_vectori simd_cmp_gt_i(simd_vectori a, simd_vectori b) {return _mm256_cmpgt_epi32(a, b);}
+
+    #define simd_asin _mm256_asin_ps
+    #define simd_atan _mm256_atan_ps
 
 #endif
 
@@ -173,6 +230,13 @@ static inline simd_vector simd_ldexp(simd_vector x, simd_vector pw2)
     fl = simd_or_i(simd_shift_left_i(e, 23), simd_and_i(fl, simd_splat_i(0x807fffff)));
     simd_vector equal_to_zero = simd_cmp_eq(x, simd_splat_zero());
     return simd_andnot(simd_cast_from_int(fl), equal_to_zero);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+static inline simd_vector simd_sign(simd_vector a)
+{
+    simd_vector result = simd_select(simd_splat_zero(), simd_splat(-1.f), simd_cmp_lt(a, simd_splat_zero()));
+    return simd_select(result, simd_splat( 1.f), simd_cmp_gt(a, simd_splat_zero()));
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -212,7 +276,7 @@ static inline simd_vector simd_ldexp(simd_vector x, simd_vector pw2)
 //----------------------------------------------------------------------------------------------------------------------
 // based on https://mazzo.li/posts/vectorized-atan2.html
 #ifdef __MATH__INTRINSICS__NEON__
-    float32x4_t vatanq_f32(float32x4_t x, float32x4_t y)
+    float32x4_t vatan2q_f32(float32x4_t x, float32x4_t y)
 #else
     __m256 _mm256_atan2_ps(__m256 x, __m256 y)
 #endif
@@ -334,9 +398,9 @@ static inline simd_vector simd_ldexp(simd_vector x, simd_vector pw2)
 //----------------------------------------------------------------------------------------------------------------------
 // based on http://gruntthepeon.free.fr/ssemath/
 #ifdef __MATH__INTRINSICS__NEON__
-    float32x4_t vsincosq_f32(float32x4_t x, float32x4_t* s, float32x4_t* c)
+    void vsincosq_f32(float32x4_t x, float32x4_t* s, float32x4_t* c)
 #else
-    __m256 _mm256_sincos_ps(__m256 x, __m256* s, __m256* c)
+    void _mm256_sincos_ps(__m256 x, __m256* s, __m256* c)
 #endif
 {
     simd_vector xmm1, xmm2, xmm3 = simd_splat_zero(), sign_bit_sin, y;
@@ -522,3 +586,7 @@ static inline simd_vector simd_ldexp(simd_vector x, simd_vector pw2)
 }
 
 #endif
+
+
+#endif
+
