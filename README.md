@@ -5,7 +5,7 @@ One header file library that implement of missing transcendental math functions 
 [![Build Status](https://github.com/geolm/math_intrinsics/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/geolm/math_intrinsics/actions)
 
 # why?
-AVX and Neon intrinsics don't provide transcendental math functions. Of course there are already some libraries with those functions but there are usually not free, restricted to one tpe of hardware or with low precision. This library is super easy to integrate, with a precision close to the C math library (see below) and with MIT license.
+AVX and Neon intrinsics don't provide transcendental math functions. Of course there are already some libraries with those functions but there are usually not free, restricted to one specific  hardware or with low precision. This library is super easy to integrate, with a precision close to the C math library (see below) and with MIT license.
 
 # how to
 
@@ -95,4 +95,8 @@ float32x4_t vcbrtq_f32(float32x4_t a);
 [simple SSE sin/cos](http://gruntthepeon.free.fr/ssemath/)
 
 [speeding up atan2f by 50x](https://mazzo.li/posts/vectorized-atan2.html)
+
+# FAQ
+
+
 
