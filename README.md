@@ -106,11 +106,11 @@ Here's the benchmark results on my old Intel Core i7 from 2018 (time for 32 bill
 * mm256_acos_ps : 24650ms
 * mm256_exp_ps : 24387ms
 
-# I'd like to trade some precision for performances
+## is there a faster version with less precision?
 
 You can look at some approximations in my [simd](https://github.com/Geolm/simd/blob/main/simd_approx_math.h) repo. It's not copy/paste friendly but you get the idea, also you can get the whole repo which contains only few files.
 
-# Why AVX2 ?
+## why AVX2 ?
 
 On multiple functions this library use a float as an int to have access to the mantissa and the exponent part. While it's doable with AVX1 using SSE4.2, I don't see the point of not using AVX2 which have been on intel CPU since 2013.
 
