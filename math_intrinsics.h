@@ -46,6 +46,8 @@ extern "C" {
     // max error : 4.768371582e-07
     float32x4_t vcbrtq_f32(float32x4_t a);
 
+    #define __MATH__INTRINSICS__NEON__
+
 #else
 #include <immintrin.h>
 
@@ -79,6 +81,8 @@ extern "C" {
     // max error : 4.768371582e-07
     __m256 _mm256_cbrt_ps(__m256 a);
 
+    #define __MATH__INTRINSICS__AVX__
+
 #endif
 
 #ifdef __cplusplus
@@ -94,7 +98,6 @@ extern "C" {
 #define SIMD_MATH_PI4 (0.78539816f)
 
 #if defined(__ARM_NEON) && defined(__ARM_NEON__)
-    #define __MATH__INTRINSICS__NEON__
     typedef float32x4_t simd_vector;
 
     static inline simd_vector simd_add(simd_vector a, simd_vector b) {return vaddq_f32(a, b);}
@@ -147,9 +150,9 @@ extern "C" {
 
     #define simd_asin vasinq_f32
     #define simd_atan vatanq_f32
+    #define simd_sincos vsincosq_f32
 
 #else
-    #define __MATH__INTRINSICS__AVX__
     typedef __m256 simd_vector;
 
     static inline simd_vector simd_add(simd_vector a, simd_vector b) {return _mm256_add_ps(a, b);}
@@ -210,6 +213,7 @@ extern "C" {
 
     #define simd_asin _mm256_asin_ps
     #define simd_atan _mm256_atan_ps
+    #define simd_sincos _mm256_sincos_ps
 
 #endif
 
@@ -487,6 +491,30 @@ static inline simd_vector simd_sign(simd_vector a)
     // update the sign
     *s = simd_xor(xmm1, sign_bit_sin);
     *c = simd_xor(xmm2, sign_bit_cos);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+#ifdef __MATH__INTRINSICS__NEON__
+float32x4_t vsinq_f32(float32x4_t x)
+#else
+__m256 _mm256_sin_ps(__m256 x)
+#endif
+{
+    simd_vector sinus, cosinus;
+    simd_sincos(x, &sinus, &cosinus);
+    return sinus;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+#ifdef __MATH__INTRINSICS__NEON__
+float32x4_t vcosq_f32(float32x4_t x)
+#else
+__m256 _mm256_cos_ps(__m256 x)
+#endif
+{
+    simd_vector sinus, cosinus;
+    simd_sincos(x, &sinus, &cosinus);
+    return cosinus;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
