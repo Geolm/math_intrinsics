@@ -132,10 +132,10 @@ extern "C" {
     static inline simd_vector simd_rcp(simd_vector a) {simd_vector out = vrecpeq_f32(a); return vmulq_f32(out, vrecpsq_f32(out, a));}
 
     typedef int32x4_t simd_vectori;
-    static inline simd_vectori simd_convert_from_float(simd_vector a) {return vreinterpretq_s32_f32(a);}
-    static inline simd_vectori simd_cast_from_float(simd_vector a) {return vcvtq_s32_f32(a);}
-    static inline simd_vector simd_convert_from_int(simd_vectori a) {return vreinterpretq_f32_s32(a);}
-    static inline simd_vector simd_cast_from_int(simd_vectori a) {return vcvtq_f32_s32(a);}
+    static inline simd_vectori simd_convert_from_float(simd_vector a) {return vcvtq_s32_f32(a);}
+    static inline simd_vectori simd_cast_from_float(simd_vector a) {return vreinterpretq_s32_f32(a);}
+    static inline simd_vector simd_convert_from_int(simd_vectori a) {return vcvtq_f32_s32(a);}
+    static inline simd_vector simd_cast_from_int(simd_vectori a) {return vreinterpretq_f32_s32(a);}
     static inline simd_vectori simd_add_i(simd_vectori a, simd_vectori b) {return vaddq_s32(a, b);}
     static inline simd_vectori simd_sub_i(simd_vectori a, simd_vectori b) {return vsubq_s32(a, b);}
     static inline simd_vectori simd_splat_i(int i) {return vdupq_n_s32(i);}
