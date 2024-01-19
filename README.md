@@ -2,7 +2,7 @@
 One header file library that implement of missing transcendental math functions (cos, sin, acos, and more....) using 100% AVX/Neon instructions (no branching)
 
 ### unit tests build status
-[![Build Status](https://github.com/geolm/math_intrinsics/actions/workflows/build.yml/badge.svg)](https://github.com/geolm/math_intrinsics/actions)
+[![Build Status](https://github.com/geolm/math_intrinsics/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/geolm/math_intrinsics/actions)
 
 # why?
 AVX and Neon intrinsics don't provide transcendental math functions. Of course there are already some libraries with those functions but there are usually not free, restricted to one tpe of hardware or with low precision. This library is super easy to integrate, with a precision close to the C math library (see below) and with MIT license.
