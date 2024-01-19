@@ -87,23 +87,39 @@ TEST generic_test(reference_function ref, approximation_function approx, float r
 
 float atan2_xy(float x, float y) {return atan2f(y, x);}
 
+#define NUM_SAMPLES (1024)
+
 SUITE(trigonometry)
 {
     printf(".");
 
 #ifdef __MATH__INTRINSICS__AVX__
-    RUN_TESTp(generic_test, sinf, mm256_sin_ps, -10.f, 10.f, FLT_EPSILON, 1024, false, "mm256_sin_ps");
-    RUN_TESTp(generic_test, cosf, mm256_cos_ps, -10.f, 10.f, FLT_EPSILON, 1024, false, "mm256_cos_ps");
-    RUN_TESTp(generic_test, acosf, mm256_acos_ps, -1.f, 1.f, 1.e-06f, 1024, false, "mm256_acos_ps");
-    RUN_TESTp(generic_test, asinf, mm256_asin_ps, -1.f, 1.f, 1.e-06f, 1024, false, "mm256_asin_ps");
-    RUN_TESTp(generic_test, atanf, mm256_atan_ps, -10.f, 10.f, 1.e-04f, 1024, false, "mm256_atan_ps");
+    RUN_TESTp(generic_test, sinf, mm256_sin_ps, -10.f, 10.f, FLT_EPSILON, NUM_SAMPLES, false, "mm256_sin_ps");
+    RUN_TESTp(generic_test, cosf, mm256_cos_ps, -10.f, 10.f, FLT_EPSILON, NUM_SAMPLES, false, "mm256_cos_ps");
+    RUN_TESTp(generic_test, acosf, mm256_acos_ps, -1.f, 1.f, 1.e-06f, NUM_SAMPLES, false, "mm256_acos_ps");
+    RUN_TESTp(generic_test, asinf, mm256_asin_ps, -1.f, 1.f, 1.e-06f, NUM_SAMPLES, false, "mm256_asin_ps");
+    RUN_TESTp(generic_test, atanf, mm256_atan_ps, -10.f, 10.f, 1.e-04f, NUM_SAMPLES, false, "mm256_atan_ps");
     //RUN_TESTp(generic_test2, atan2_xy, simd_atan2, 1.e-06f, 1024, false, "simd_atan2");
 #else
-    RUN_TESTp(generic_test, sinf, vsinq_f32, -10.f, 10.f, FLT_EPSILON, 1024, false, "vsinq_f32");
-    RUN_TESTp(generic_test, cosf, vcosq_f32, -10.f, 10.f, FLT_EPSILON, 1024, false, "vcosq_f32");
-    RUN_TESTp(generic_test, acosf, vacosq_f32, -1.f, 1.f, 1.e-06f, 1024, false, "vacosq_f32");
-    RUN_TESTp(generic_test, asinf, vasinq_f32, -1.f, 1.f, 1.e-06f, 1024, false, "vasinq_f32");
-    RUN_TESTp(generic_test, atanf, vatanq_f32, -10.f, 10.f, 1.e-04f, 1024, false, "vatanq_f32");
+    RUN_TESTp(generic_test, sinf, vsinq_f32, -10.f, 10.f, FLT_EPSILON, NUM_SAMPLES, false, "vsinq_f32");
+    RUN_TESTp(generic_test, cosf, vcosq_f32, -10.f, 10.f, FLT_EPSILON, NUM_SAMPLES, false, "vcosq_f32");
+    RUN_TESTp(generic_test, acosf, vacosq_f32, -1.f, 1.f, 1.e-06f, NUM_SAMPLES, false, "vacosq_f32");
+    RUN_TESTp(generic_test, asinf, vasinq_f32, -1.f, 1.f, 1.e-06f, NUM_SAMPLES, false, "vasinq_f32");
+    RUN_TESTp(generic_test, atanf, vatanq_f32, -10.f, 10.f, 1.e-04f, NUM_SAMPLES, false, "vatanq_f32");
+#endif
+}
+
+SUITE(exponentiation)
+{
+    printf(".");
+#ifdef __MATH__INTRINSICS__AVX__
+    RUN_TESTp(generic_test, logf, mm256_log_ps, FLT_EPSILON, 1.e20f, 1.e-07f, 32768, true, "mm256_log_ps");
+    RUN_TESTp(generic_test, expf, mm256_exp_ps, -87.f, 87.f, 2.e-07f, NUM_SAMPLES, true, "mm256_exp_ps");
+    RUN_TESTp(generic_test, cbrtf, mm256_cbrt_ps, -1000.f, 1000.f, 2.e-07f, 4096, true, "mm256_cbrt_ps");
+#else
+    RUN_TESTp(generic_test, logf, vlogq_f32, FLT_EPSILON, 1.e20f, 1.e-07f, 32768, true, "vlogq_f32");
+    RUN_TESTp(generic_test, expf, vexpq_f32, -87.f, 87.f, 2.e-07f, NUM_SAMPLES, true, "vexpq_f32");
+    RUN_TESTp(generic_test, cbrtf, vcbrtq_f32, -1000.f, 1000.f, 2.e-07f, 4096, true, "vcbrtq_f32");
 #endif
 }
 
@@ -114,6 +130,7 @@ int main(int argc, char * argv[])
     GREATEST_MAIN_BEGIN();
 
     RUN_SUITE(trigonometry);
+    RUN_SUITE(exponentiation);
 
     GREATEST_MAIN_END();
 }
