@@ -9,6 +9,9 @@
 
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #if defined(__ARM_NEON) && defined(__ARM_NEON__)
 #include <arm_neon.h>
@@ -76,6 +79,10 @@
     // max error : 4.768371582e-07
     __m256 _mm256_cbrt_ps(__m256 a);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 
