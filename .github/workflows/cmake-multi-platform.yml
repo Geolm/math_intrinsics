@@ -22,7 +22,7 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/
-      run: ./tests
+      run: ./test
       
   build-macos:
     name: macos
@@ -39,7 +39,7 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/
-      run: ./tests
+      run: ./test
       
   build-windows:
     name: windows
@@ -58,4 +58,4 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}\tests\Debug
-      run: ./tests
+      run: ./test
