@@ -1,0 +1,61 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-ubuntu-clang:
+    name: ubuntu-clang
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure CMake
+      run: cmake ${{github.workspace}}/tests/ -DCMAKE_C_COMPILER=clang
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/
+
+    - name: Test
+      working-directory: ${{github.workspace}}/
+      run: ./tests
+      
+  build-macos:
+    name: macos
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure CMake
+      run: cmake ${{github.workspace}}/tests/
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/
+
+    - name: Test
+      working-directory: ${{github.workspace}}/
+      run: ./tests
+      
+  build-windows:
+    name: windows
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure CMake
+      working-directory: ${{github.workspace}}\tests
+      run: cmake .
+
+    - name: Build
+      working-directory: ${{github.workspace}}\tests
+      run: cmake --build .
+
+    - name: Test
+      working-directory: ${{github.workspace}}\tests\Debug
+      run: ./tests
