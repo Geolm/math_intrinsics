@@ -101,14 +101,14 @@ float32x4_t vcbrtq_f32(float32x4_t a);
 ## is it fast?
 The goal of this library is to provide math function with a good precision with every computation done in AVX/NEON. Performance is not the focus.
 
-Here's the benchmark results on my old Intel Core i7 from 2018 (time for 32 billions of computed value)
+Here's the benchmark results on my old Intel Core i7 from 2018 (time for 32 billions of computed values)
 * mm256_sin_ps : 29887ms
 * mm256_acos_ps : 24650ms
 * mm256_exp_ps : 24387ms
 
 # I'd like to trade some precision for performances
 
-You can look at some approximation in my [simd](https://github.com/Geolm/simd/blob/main/simd_approx_math.h).
+You can look at some approximations in my [simd](https://github.com/Geolm/simd/blob/main/simd_approx_math.h) repo. It's not copy/paste friendly but you get the idea, also you can get the whole repo which contains only few files.
 
 # Why AVX2 ?
 
