@@ -40,8 +40,14 @@ extern "C" {
     // max error : 4.768371582e-07
     float32x4_t vlogq_f32(float32x4_t a);
 
+    // max error : 2.349663504e-07
+    float32x4_t vlog2q_f32(float32x4_t x);
+
     // max error : 1.108270880e-07
     float32x4_t vexpq_f32(float32x4_t a);
+
+    // max error : 1.042427087e-07
+    float32x4_t vexp2q_f32(float32x4_t a);
 
     // max error : 4.768371582e-07
     float32x4_t vcbrtq_f32(float32x4_t a);
@@ -75,8 +81,14 @@ extern "C" {
     // max error : 4.768371582e-07
     __m256 mm256_log_ps(__m256 a);
 
+    // max error : 2.349663504e-07
+    __m256 mm256_log2_ps(__m256 x);
+
     // max error : 1.108270880e-07
     __m256 mm256_exp_ps(__m256 a);
+
+    // max error : 1.042427087e-07
+    __m256 mm256_exp2_ps(__m256 x);
 
     // max error : 4.768371582e-07
     __m256 mm256_cbrt_ps(__m256 a);
@@ -120,6 +132,9 @@ extern "C" {
     static inline simd_vector simd_select(simd_vector a, simd_vector b, simd_vector mask) {return vbslq_f32(vreinterpretq_u32_f32(mask), b, a);}
     static inline simd_vector simd_splat(float value) {return vdupq_n_f32(value);}
     static inline simd_vector simd_splat_zero(void) {return vdupq_n_f32(0);}
+    static inline simd_vector simd_splat_nan(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0xffffffff));}
+    static inline simd_vector simd_splat_positive_infinity(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0x7f800000));}
+    static inline simd_vector simd_splat_negative_infinity(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0xff800000));}
     static inline simd_vector simd_sign_mask(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0x80000000));}
     static inline simd_vector simd_inv_sign_mask(void) {return vreinterpretq_u32_f32(vdupq_n_u32(~0x80000000));}
     static inline simd_vector simd_abs_mask(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0x7FFFFFFF));}
@@ -178,6 +193,9 @@ extern "C" {
     static inline simd_vector simd_select(simd_vector a, simd_vector b, simd_vector mask) {return _mm256_blendv_ps(a, b, mask);}
     static inline simd_vector simd_splat(float value) {return _mm256_set1_ps(value);}
     static inline simd_vector simd_splat_zero(void) {return _mm256_setzero_ps();}
+    static inline simd_vector simd_splat_nan(void) {return _mm256_castsi256_ps(_mm256_set1_epi32(0xffffffff));}
+    static inline simd_vector simd_splat_positive_infinity(void) {return _mm256_castsi256_ps(_mm256_set1_epi32(0x7f800000));}
+    static inline simd_vector simd_splat_negative_infinity(void) {return _mm256_castsi256_ps(_mm256_set1_epi32(0xff800000));}
     static inline simd_vector simd_sign_mask(void) {return _mm256_castsi256_ps(_mm256_set1_epi32(0x80000000));}
     static inline simd_vector simd_inv_sign_mask(void) {return _mm256_castsi256_ps(_mm256_set1_epi32(~0x80000000));}
     static inline simd_vector simd_min_normalized(void) {return _mm256_castsi256_ps(_mm256_set1_epi32(0x00800000));} // the smallest non denormalized float number
@@ -242,6 +260,8 @@ static inline simd_vector simd_ldexp(simd_vector x, simd_vector pw2)
     simd_vector equal_to_zero = simd_cmp_eq(x, simd_splat_zero());
     return simd_andnot(simd_cast_from_int(fl), equal_to_zero);
 }
+
+static inline simd_vector simd_clamp(simd_vector a, simd_vector range_min, simd_vector range_max) {return simd_max(simd_min(a, range_max), range_min);}
 
 //----------------------------------------------------------------------------------------------------------------------
 static inline simd_vector simd_sign(simd_vector a)
@@ -360,6 +380,43 @@ static inline simd_vector simd_sign(simd_vector a)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+// based on https://github.com/redorav/hlslpp/blob/master/include/hlsl%2B%2B_vector_float8.h
+#ifdef __MATH__INTRINSICS__NEON__
+    float32x4_t vlog2q_f32(float32x4_t x)
+#else
+    __m256 mm256_log2_ps(__m256 x)
+#endif
+{
+    simd_vector one = simd_splat(1.f);
+    simd_vectori exp = simd_splat_i(0x7f800000);
+    simd_vectori mant = simd_splat_i(0x007fffff);
+    simd_vectori i = simd_cast_from_float(x);
+    simd_vector e = simd_convert_from_int(simd_sub_i(simd_shift_right_i(simd_and_i(i, exp), 23), simd_splat_i(127)));
+    simd_vector m = simd_or(simd_cast_from_int(simd_and_i(i, mant)), one);
+
+    // minimax polynomial fit of log2(x)/(x - 1), for x in range [1, 2[
+    simd_vector p = simd_fmad(m, simd_splat(-3.4436006e-2f), simd_splat(3.1821337e-1f));
+    p = simd_fmad(m, p, simd_splat(-1.2315303f));
+    p = simd_fmad(m, p, simd_splat(2.5988452f));
+    p = simd_fmad(m, p, simd_splat(-3.3241990f));
+    p = simd_fmad(m, p, simd_splat(3.1157899f));
+
+    // this effectively increases the polynomial degree by one, but ensures that log2(1) == 0
+    p = simd_mul(p, simd_sub(m, one));
+    simd_vector result = simd_add(p, e);
+
+    // we can't compute a logarithm beyond this value, so we'll mark it as -infinity to indicate close to 0
+    simd_vector ltminus127 = simd_cmp_le(result, simd_splat(-127.f));
+    result = simd_select(result, simd_splat_negative_infinity(), ltminus127);
+
+    // Check for negative values and return NaN
+    simd_vector lt0 = simd_cmp_lt(x, simd_splat_zero());
+    result = simd_select(result, simd_splat_nan(), lt0);
+
+    return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 // based on http://gruntthepeon.free.fr/ssemath/
 #ifdef __MATH__INTRINSICS__NEON__
     float32x4_t vexpq_f32(float32x4_t x)
@@ -404,6 +461,37 @@ static inline simd_vector simd_sign(simd_vector a)
 
     y = simd_mul(y, pow2n);
     return y;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// based on https://github.com/jeremybarnes/cephes/blob/master/single/exp2f.c
+#ifdef __MATH__INTRINSICS__NEON__
+    float32x4_t vexp2q_f32(float32x4_t x)
+#else
+    __m256 mm256_exp2_ps(__m256 x)
+#endif
+{
+    // clamp values
+    x = simd_clamp(x, simd_splat(-127.f), simd_splat(127.f));
+    simd_vector equal_to_zero = simd_cmp_eq(x, simd_splat_zero());
+
+    simd_vector i0 = simd_floor(x);
+    x = simd_sub(x, i0);
+
+    simd_vector above_half = simd_cmp_gt(x, simd_splat(.5f));
+    simd_vector one = simd_splat(1.f);
+    i0 = simd_select(i0, simd_add(i0, one), above_half);
+    x = simd_select(x, simd_sub(x, one), above_half);
+
+    simd_vector px = simd_fmad(x, simd_splat(1.535336188319500E-004f), simd_splat(1.339887440266574E-003f));
+    px = simd_fmad(px, x, simd_splat(9.618437357674640E-003f));
+    px = simd_fmad(px, x, simd_splat(5.550332471162809E-002f));
+    px = simd_fmad(px, x, simd_splat(2.402264791363012E-001f));
+    px = simd_fmad(px, x, simd_splat(6.931472028550421E-001f));
+    px = simd_fmad(px, x,  one);
+    px = simd_ldexp(px, i0);
+
+    return simd_select(px, one, equal_to_zero);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
