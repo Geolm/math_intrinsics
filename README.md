@@ -5,7 +5,7 @@ One header file library that implement of missing transcendental math functions 
 [![Build Status](https://github.com/geolm/math_intrinsics/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/geolm/math_intrinsics/actions)
 
 # why?
-AVX and Neon intrinsics don't provide transcendental math functions. Of course there are already some libraries with those functions but there are usually not free, restricted to one tpe of hardware or with low precision. This library is super easy to integrate, with a precision close to the C math library (see below) and with MIT license.
+AVX and Neon intrinsics don't provide transcendental math functions. Of course there are already some libraries with those functions but there are usually not free, restricted to one specific  hardware or with low precision. This library is super easy to integrate, with a precision close to the C math library (see below) and with MIT license.
 
 # how to
 
@@ -95,4 +95,22 @@ float32x4_t vcbrtq_f32(float32x4_t a);
 [simple SSE sin/cos](http://gruntthepeon.free.fr/ssemath/)
 
 [speeding up atan2f by 50x](https://mazzo.li/posts/vectorized-atan2.html)
+
+# FAQ
+
+## is it fast?
+The goal of this library is to provide math function with a good precision with every computation done in AVX/NEON. Performance is not the focus.
+
+Here's the benchmark results on my old Intel Core i7 from 2018 (time for 32 billions of computed values)
+* mm256_sin_ps : 29887ms
+* mm256_acos_ps : 24650ms
+* mm256_exp_ps : 24387ms
+
+## is there a faster version with less precision?
+
+You can look at some approximations in my [simd](https://github.com/Geolm/simd/blob/main/simd_approx_math.h) repo. It's not copy/paste friendly but you get the idea, also you can get the whole repo which contains only few files.
+
+## why AVX2 ?
+
+On multiple functions this library use a float as an int to have access to the mantissa and the exponent part. While it's doable with AVX1 using SSE4.2, I don't see the point of not using AVX2 which have been on intel CPU since 2013.
 
