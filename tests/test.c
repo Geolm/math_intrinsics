@@ -122,7 +122,7 @@ SUITE(exponentiation)
     RUN_TESTp(generic_test, logf, vlogq_f32, FLT_EPSILON, 1.e20f, 1.e-07f, 32768, true, "vlogq_f32");
     RUN_TESTp(generic_test, log2f, vlog2q_f32, FLT_EPSILON, 1.e20f, 3.e-07f, 32768, true, "vlog2q_f32");
     RUN_TESTp(generic_test, expf, vexpq_f32, -87.f, 87.f, 2.e-07f, NUM_SAMPLES, true, "vexpq_f32");
-    RUN_TESTp(generic_test, exp2f, vexp2q_f32, -126.f, 126.f, 2.e-07f, NUM_SAMPLES, true, "vexpq_f32");
+    RUN_TESTp(generic_test, exp2f, vexp2q_f32, -126.f, 126.f, 2.e-07f, NUM_SAMPLES, true, "vexp2q_f32");
     RUN_TESTp(generic_test, cbrtf, vcbrtq_f32, -1000.f, 1000.f, 2.e-07f, 4096, true, "vcbrtq_f32");
 #endif
 }
