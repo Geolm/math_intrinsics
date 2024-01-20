@@ -47,8 +47,14 @@ __m256 mm256_atan2_ps(__m256 x, __m256 y);
 // max error : 9.107976950e-08
 __m256 mm256_log_ps(__m256 a);
 
+// max error : 2.349663504e-07
+__m256 mm256_log2_ps(__m256 x);
+
 // max error : 1.108270880e-07
 __m256 mm256_exp_ps(__m256 a);
+
+// max error : 1.042427087e-07
+__m256 mm256_exp2_ps(__m256 x);
 
 // max error : 1.184910232e-07
 __m256 mm256_cbrt_ps(__m256 a);
@@ -81,8 +87,14 @@ float32x4_t vatan2q_f32(float32x4_t x, float32x4_t y);
 // max error : 9.107976950e-08
 float32x4_t vlogq_f32(float32x4_t a);
 
+// max error : 2.349663504e-07
+float32x4_t vlog2q_f32(float32x4_t x);
+
 // max error : 1.108270880e-07
 float32x4_t vexpq_f32(float32x4_t a);
+
+// max error : 1.042427087e-07
+float32x4_t vexp2q_f32(float32x4_t a);
 
 // max error : 1.184910232e-07
 float32x4_t vcbrtq_f32(float32x4_t a);
