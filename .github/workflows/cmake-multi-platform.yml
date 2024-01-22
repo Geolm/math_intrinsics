@@ -19,6 +19,10 @@ jobs:
 
     - name: Build
       run: cmake --build ${{github.workspace}}/
+
+    - name: Test
+      working-directory: ${{github.workspace}}/
+      run: ./test
       
   build-macos:
     name: macos
