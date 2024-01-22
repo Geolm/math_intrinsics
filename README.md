@@ -120,7 +120,7 @@ Here's the benchmark results on my old Intel Core i7 from 2018 (time for 32 bill
 
 ## is there a faster version with less precision?
 
-You can look at some approximations in my [simd](https://github.com/Geolm/simd/blob/main/simd_approx_math.h) repo. It's not copy/paste friendly but you get the idea, also you can get the whole repo which contains only few files.
+You can look at some approximations in my [simd](https://github.com/Geolm/simd/blob/main/extra/simd_approx_math.h) repo. It's not copy/paste friendly but you get the idea, also you can get the whole repo which contains only few files.
 
 ## why AVX2 ?
 
