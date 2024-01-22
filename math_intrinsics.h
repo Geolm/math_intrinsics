@@ -313,6 +313,8 @@ static inline simd_vector simd_sign(simd_vector a)
 #endif
 {
     simd_vector swap = simd_cmp_lt(simd_abs(x), simd_abs(y));
+    simd_vector x_equals_zero = simd_cmp_eq(x, simd_splat_zero());
+    simd_vector y_equals_zero = simd_cmp_eq(y, simd_splat_zero());
     simd_vector x_over_y = simd_div(x, y);
     simd_vector y_over_x = simd_div(y, x);
     simd_vector atan_input = simd_select(y_over_x, x_over_y, swap);
@@ -322,7 +324,10 @@ static inline simd_vector simd_sign(simd_vector a)
     result = simd_select(result, simd_sub(adjust, result), swap);
 
     simd_vector x_sign_mask = simd_cmp_lt(x, simd_splat_zero());
-    return simd_add( simd_and(simd_xor(simd_splat(SIMD_MATH_PI), simd_and(simd_sign_mask(), y)), x_sign_mask), result);
+    result = simd_add( simd_and(simd_xor(simd_splat(SIMD_MATH_PI), simd_and(simd_sign_mask(), y)), x_sign_mask), result);
+    result = simd_select(result, simd_mul(simd_sign(x), simd_splat_zero()), y_equals_zero);
+    result = simd_select(result, simd_mul(simd_sign(y), simd_splat(SIMD_MATH_PI2)), x_equals_zero);
+    return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
