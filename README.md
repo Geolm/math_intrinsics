@@ -1,5 +1,5 @@
 # math_intrinsics
-One header file library that implement of missing transcendental math functions (cos, sin, acos, and more....) using 100% AVX/Neon instructions (no branching)
+One header file library that implement missing transcendental math functions (cos, sin, acos, and more....) using 100% AVX/Neon instructions (no branching)
 
 ### unit tests build status
 [![Build Status](https://github.com/geolm/math_intrinsics/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/geolm/math_intrinsics/actions)
