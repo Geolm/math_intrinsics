@@ -89,12 +89,19 @@ TEST generic_test(reference_function ref, approximation_function approx, float r
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-float atan2_angle(float angle) {return atan2f(sinf(angle) * angle, cosf(angle) * angle);}
+float atan2_angle(float angle) {return atan2f(sinf(angle) * (angle + 1.f), cosf(angle) * (angle + 1.f));}
 
 #ifdef __MATH__INTRINSICS__AVX__
-__m256 simd_atan2(__m256 angle) {return mm256_atan2_ps(_mm256_mul_ps(mm256_cos_ps(angle), angle), _mm256_mul_ps(mm256_sin_ps(angle), angle));}
+__m256 simd_atan2(__m256 angle) 
+{
+    __m256 angle_plus_one = _mm256_add_ps(angle, _mm256_set1_ps(1.f));
+    return mm256_atan2_ps(_mm256_mul_ps(mm256_cos_ps(angle), angle_plus_one), _mm256_mul_ps(mm256_sin_ps(angle), angle_plus_one));}
 #else
-float32x4_t simd_atan2(float32x4_t angle) {return vatan2q_f32(vmulq_f32(vcosq_f32(angle), angle), vmulq_f32(vsinq_f32(angle), angle));}
+float32x4_t simd_atan2(float32x4_t angle) 
+{
+    float32x4_t angle_plus_one = vaddq_f32(angle, vdupq_n_f32(1.f));
+    return vatan2q_f32(vmulq_f32(vcosq_f32(angle), angle_plus_one), vmulq_f32(vsinq_f32(angle), angle_plus_one));
+}
 #endif
 
 
