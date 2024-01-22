@@ -9,7 +9,7 @@ AVX and Neon intrinsics don't provide transcendental math functions. Of course t
 
 # how to
 
-It's one-header lib, just define the macro once and include the header.
+It's a one-header lib, just define the macro once in your project and include the header.
 
 ```C
 #define __MATH__INTRINSICS__IMPLEMENTATION__
@@ -125,4 +125,8 @@ You can look at some approximations in my [simd](https://github.com/Geolm/simd/b
 ## why AVX2 ?
 
 On multiple functions this library use a float as an int to have access to the mantissa and the exponent part. While it's doable with AVX1 using SSE4.2, I don't see the point of not using AVX2 which have been on intel CPU since 2013.
+
+## does it handle all float cases (+inf, -inf, NAN) as the C math lib?
+
+No, but it should be good enough for most programs.
 
