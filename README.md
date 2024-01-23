@@ -4,7 +4,7 @@ One header file library that implement missing transcendental math functions (co
 ### unit tests build status
 [![Build Status](https://github.com/geolm/math_intrinsics/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/geolm/math_intrinsics/actions)
 
-# why?
+# why
 AVX and Neon intrinsics don't provide transcendental math functions. Of course there are already some libraries with those functions but there are usually not free, restricted to one specific  hardware or with low precision. This library is super easy to integrate, with a precision close to the C math library (see below) and with MIT license.
 
 # how to
@@ -16,7 +16,7 @@ It's a one-header lib, just define the macro once in your project and include th
 #include "math_intrinsics.h"
 ```
 
-On intel/AMD computer, you need to compile with -mavx2. You can add also -mfma
+On intel/AMD computer, you need to compile with **-mavx2**. You can add also -mfma
 
 On ARM based computer nothing required as the lib is for AArch64
 
@@ -128,5 +128,5 @@ On multiple functions this library use a float as an int to have access to the m
 
 ## does it handle all float cases (+inf, -inf, NAN) as the C math lib?
 
-No, but it should be good enough for most programs.
+No, infinity, NAN are not supported as input.
 
