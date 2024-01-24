@@ -423,7 +423,6 @@ static inline simd_vector simd_sign(simd_vector a)
     simd_vector m = simd_or(simd_cast_from_int(simd_and_i(i, mant)), one);
 
     // minimax polynomial fit of log2(x)/(x - 1), for x in range [1, 2[
-    // minimax polynomial fit of log2(x)/(x - 1), for x in range [1, 2[
     simd_vector p = simd_polynomial6(m, (float[]){-3.4436006e-2f, 3.1821337e-1f, -1.2315303f, 2.5988452f, -3.3241990f, 3.1157899f});
 
     // this effectively increases the polynomial degree by one, but ensures that log2(1) == 0
