@@ -22,8 +22,7 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/
-      run: ./test_precision
-           ./test_fast
+      run: ./test_precision && ./test_fast
       
   build-macos:
     name: macos
