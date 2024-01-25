@@ -109,7 +109,7 @@ float32x4_t simd_atan2(float32x4_t angle)
 
 #ifdef __MATH_INTRINSINCS_FAST__
 static const float trigo_threshold = 1.e-06f;
-static const float arc_theshold = 1.e-04;
+static const float arc_theshold = 1.e-04f;
 #else
 static const float trigo_threshold = FLT_EPSILON;
 static const float arc_theshold = 1.e-06f;
