@@ -39,8 +39,7 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/
-      run: ./test_precision
-           ./test_fast
+      run: ./test_precision && ./test_fast
       
   build-windows:
     name: windows
@@ -59,5 +58,4 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}\tests\Debug
-      run: ./test_precision
-           ./test_fast
+      run: ./test_precision && ./test_fast
