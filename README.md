@@ -16,11 +16,14 @@ It's a one-header lib, just define the macro once in your project and include th
 #include "math_intrinsics.h"
 ```
 
-On intel/AMD computer, you need to compile with **-mavx2**. You can add also -mfma
-
+On intel/AMD computer, you need to compile with **-mavx2**. You can add also -mfma. 
 On ARM based computer nothing required as the lib is for AArch64
 
-You can use the macro __MATH_INTRINSINCS_FAST__ to generate faster albeit less precise functions (see below for more details)
+
+You can define this macro to generate faster albeit less precise functions (see below for more details) :
+```C
+#define __MATH_INTRINSINCS_FAST__
+```
 
 # functions
 
@@ -104,7 +107,7 @@ float32x4_t vcbrtq_f32(float32x4_t a);
 
 # fast functions 
 
-If you use the macro __MATH_INTRINSINCS_FAST__ some functions will have less precision but better performances (2.5-4x):
+If you use the macro \_\_MATH_INTRINSINCS_FAST\_\_ some functions will have less precision but better performances (2.5-4x):
 
 * sin, max_error : 2.682209015e-07
 * cos, max_error : 5.811452866e-07
