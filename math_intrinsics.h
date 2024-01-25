@@ -142,6 +142,7 @@ extern "C" {
     static inline simd_vector simd_inv_mant_mask(void){return vreinterpretq_u32_f32(vdupq_n_u32(~0x7f800000));}
     static inline simd_vector simd_mant_mask(void){return vreinterpretq_u32_f32(vdupq_n_u32(0x7f800000));}
     static inline simd_vector simd_floor(simd_vector a) {return vrndmq_f32(a);}
+    static inline simd_vector simd_round(simd_vector a) {return vrndnq_f32(a);}
     static inline simd_vector simd_neg(simd_vector a) {return vnegq_f32(a);}
     static inline simd_vector simd_sqrt(simd_vector a) {return vsqrtq_f32(a);}
     static inline simd_vector simd_rcp(simd_vector a) {simd_vector out = vrecpeq_f32(a); return vmulq_f32(out, vrecpsq_f32(out, a));}
@@ -166,6 +167,7 @@ extern "C" {
     #define simd_asin vasinq_f32
     #define simd_atan vatanq_f32
     #define simd_sincos vsincosq_f32
+    #define simd_sin vsinq_f32
 
 #else
     typedef __m256 simd_vector;
@@ -202,6 +204,7 @@ extern "C" {
     static inline simd_vector simd_inv_mant_mask(void){return _mm256_castsi256_ps(_mm256_set1_epi32(~0x7f800000));}
     static inline simd_vector simd_mant_mask(void){return _mm256_castsi256_ps(_mm256_set1_epi32(0x7f800000));}
     static inline simd_vector simd_floor(simd_vector a) {return _mm256_floor_ps(a);}
+    static inline simd_vector simd_round(simd_vector a) {return _mm256_round_ps(a, _MM_FROUND_NINT);}
     static inline simd_vector simd_cmp_gt(simd_vector a, simd_vector b) {return _mm256_cmp_ps(a, b, _CMP_GT_OQ);}
     static inline simd_vector simd_cmp_ge(simd_vector a, simd_vector b) {return _mm256_cmp_ps(a, b, _CMP_GE_OQ);}
     static inline simd_vector simd_cmp_lt(simd_vector a, simd_vector b) {return _mm256_cmp_ps(a, b, _CMP_LT_OQ);}
@@ -232,6 +235,7 @@ extern "C" {
     #define simd_asin mm256_asin_ps
     #define simd_atan mm256_atan_ps
     #define simd_sincos mm256_sincos_ps
+    #define simd_sin mm256_sin_ps
 
 #endif
 
@@ -605,9 +609,36 @@ float32x4_t vsinq_f32(float32x4_t x)
 __m256 mm256_sin_ps(__m256 x)
 #endif
 {
+#ifdef __MATH_INTRINSINCS_FAST__
+    // range reduction from hlslpp, polynomial computed by lolremez
+    simd_vector invtau = simd_splat(1.f/SIMD_MATH_TAU);
+    simd_vector tau = simd_splat(SIMD_MATH_TAU);
+    simd_vector pi2 = simd_splat(SIMD_MATH_PI2);
+
+    // Range reduction (into [-pi, pi] range)
+    // Formula is x = x - round(x / 2pi) * 2pi
+    x = simd_sub(x, simd_mul(simd_round(simd_mul(x, invtau)), tau));
+
+    simd_vector gt_pi2 = simd_cmp_gt(x, pi2);
+    simd_vector lt_minus_pi2 = simd_cmp_lt(x, simd_neg(pi2));
+    simd_vector ox = x;
+
+    // Use identities/mirroring to remap into the range of the minimax polynomial
+    simd_vector pi = simd_splat(SIMD_MATH_PI);
+    x = simd_select(x, simd_sub(pi, ox), gt_pi2);
+    x = simd_select(x, simd_sub(simd_neg(pi), ox), lt_minus_pi2);
+
+    simd_vector x_squared = simd_mul(x, x);
+    simd_vector result = simd_polynomial4(x_squared, (float[]){2.6000548e-6f, -1.9806615e-4f, 8.3330173e-3f, -1.6666657e-1f});
+    result = simd_mul(result, x_squared);
+    result = simd_fmad(result, x, x);
+
+    return result;
+#else
     simd_vector sinus, cosinus;
     simd_sincos(x, &sinus, &cosinus);
     return sinus;
+#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -617,19 +648,32 @@ float32x4_t vcosq_f32(float32x4_t x)
 __m256 mm256_cos_ps(__m256 x)
 #endif
 {
+#ifdef __MATH_INTRINSINCS_FAST__
+    return simd_sin(simd_sub(simd_splat(SIMD_MATH_PI2), x));
+#else
     simd_vector sinus, cosinus;
     simd_sincos(x, &sinus, &cosinus);
     return cosinus;
+#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-// based on https://github.com/jeremybarnes/cephes/blob/master/single/asinf.c
 #ifdef __MATH__INTRINSICS__NEON__
     float32x4_t vasinq_f32(float32x4_t xx)
 #else
     __m256 mm256_asin_ps(__m256 xx)
 #endif
 {
+#ifdef __MATH_INTRINSINCS_FAST__
+    // based on https://developer.download.nvidia.com/cg/asin.html
+    simd_vector x = xx;
+    simd_vector negate = simd_select(simd_splat_zero(), simd_splat(1.f), simd_cmp_lt(x, simd_splat_zero()));
+    x = simd_abs(x);
+    simd_vector result = simd_polynomial4(x, (float[]){-0.0187293f, 0.0742610f, -0.2121144f, 1.5707288f});
+    result = simd_sub(simd_splat(SIMD_MATH_PI2), simd_mul(simd_sqrt(simd_sub(simd_splat(1.f), x)), result));
+    return simd_sub(result, simd_mul(simd_mul(simd_splat(2.f), result), negate));
+#else
+    // based on https://github.com/jeremybarnes/cephes/blob/master/single/asinf.c
     simd_vector x = xx;
     simd_vector sign = simd_sign(xx);
     simd_vector a  = simd_abs(x);
@@ -656,6 +700,7 @@ __m256 mm256_cos_ps(__m256 x)
     z = simd_select(z, simd_splat_zero(), greater_one);
     z = simd_mul(z, sign);
     return z;
+#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -666,10 +711,19 @@ __m256 mm256_cos_ps(__m256 x)
     __m256 mm256_acos_ps(__m256 x)
 #endif
 {
+#ifdef __MATH_INTRINSINCS_FAST__
+    simd_vector negate = simd_select(simd_splat_zero(), simd_splat(1.f), simd_cmp_lt(x, simd_splat_zero()));
+    x = simd_abs(x);
+    simd_vector result = simd_polynomial4(x, (float[]){-0.0187293f, 0.0742610f, -0.2121144f, 1.5707288f});
+    result = simd_mul(result, simd_sqrt(simd_sub(simd_splat(1.f), x)));
+    result = simd_sub(result, simd_mul(simd_mul(simd_splat(2.f), negate), result));
+    return simd_fmad(negate, simd_splat(SIMD_MATH_PI), result);
+#else
     simd_vector out_of_bound = simd_cmp_gt(simd_abs(x), simd_splat(1.f));
     simd_vector result = simd_sub(simd_splat(SIMD_MATH_PI2), simd_asin(x));
     result = simd_select(result, simd_splat_zero(), out_of_bound);
     return result;
+#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------

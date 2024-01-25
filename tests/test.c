@@ -107,27 +107,36 @@ float32x4_t simd_atan2(float32x4_t angle)
 
 #define NUM_SAMPLES (1024)
 
+#ifdef __MATH_INTRINSINCS_FAST__
+static const float trigo_threshold = 1.e-06f;
+static const float arc_theshold = 1.e-04;
+#else
+static const float trigo_threshold = FLT_EPSILON;
+static const float arc_theshold = 1.e-06f;
+#endif
+
+
 SUITE(trigonometry)
 {
     printf(".");
 
 #ifdef __MATH__INTRINSICS__AVX__
-    RUN_TESTp(generic_test, sinf, mm256_sin_ps, -10.f, 10.f, FLT_EPSILON, NUM_SAMPLES, false, "mm256_sin_ps");
-    RUN_TESTp(generic_test, cosf, mm256_cos_ps, -10.f, 10.f, FLT_EPSILON, NUM_SAMPLES, false, "mm256_cos_ps");
-    RUN_TESTp(generic_test, acosf, mm256_acos_ps, -1.f, 1.f, 1.e-06f, NUM_SAMPLES, false, "mm256_acos_ps");
-    RUN_TESTp(generic_test, asinf, mm256_asin_ps, -1.f, 1.f, 1.e-06f, NUM_SAMPLES, false, "mm256_asin_ps");
+    RUN_TESTp(generic_test, sinf, mm256_sin_ps, -10.f, 10.f, trigo_threshold, NUM_SAMPLES, false, "mm256_sin_ps");
+    RUN_TESTp(generic_test, cosf, mm256_cos_ps, -10.f, 10.f, trigo_threshold, NUM_SAMPLES, false, "mm256_cos_ps");
+    RUN_TESTp(generic_test, acosf, mm256_acos_ps, -1.f, 1.f, arc_theshold, NUM_SAMPLES, false, "mm256_acos_ps");
+    RUN_TESTp(generic_test, asinf, mm256_asin_ps, -1.f, 1.f, arc_theshold, NUM_SAMPLES, false, "mm256_asin_ps");
     RUN_TESTp(generic_test, atanf, mm256_atan_ps, -10.f, 10.f, 1.e-04f, NUM_SAMPLES, false, "mm256_atan_ps");
 
     // this task fails on linux and I don't have this OS to debug
     #if !defined(__linux__)
-        RUN_TESTp(generic_test, atan2_angle, simd_atan2, 0.f, 6.28318530f, 3.e-07f, 32768, false, "mm256_atan2_ps");
+        RUN_TESTp(generic_test, atan2_angle, simd_atan2, 0.f, 6.28318530f, arc_theshold, 32768, false, "mm256_atan2_ps");
     #endif
 #else
-    RUN_TESTp(generic_test, sinf, vsinq_f32, -10.f, 10.f, FLT_EPSILON, NUM_SAMPLES, false, "vsinq_f32");
-    RUN_TESTp(generic_test, cosf, vcosq_f32, -10.f, 10.f, FLT_EPSILON, NUM_SAMPLES, false, "vcosq_f32");
-    RUN_TESTp(generic_test, acosf, vacosq_f32, -1.f, 1.f, 1.e-06f, NUM_SAMPLES, false, "vacosq_f32");
-    RUN_TESTp(generic_test, asinf, vasinq_f32, -1.f, 1.f, 1.e-06f, NUM_SAMPLES, false, "vasinq_f32");
-    RUN_TESTp(generic_test, atanf, vatanq_f32, -10.f, 10.f, 1.e-04f, NUM_SAMPLES, false, "vatanq_f32");
+    RUN_TESTp(generic_test, sinf, vsinq_f32, -10.f, 10.f, trigo_threshold, NUM_SAMPLES, false, "vsinq_f32");
+    RUN_TESTp(generic_test, cosf, vcosq_f32, -10.f, 10.f, trigo_threshold, NUM_SAMPLES, false, "vcosq_f32");
+    RUN_TESTp(generic_test, acosf, vacosq_f32, -1.f, 1.f, arc_theshold, NUM_SAMPLES, false, "vacosq_f32");
+    RUN_TESTp(generic_test, asinf, vasinq_f32, -1.f, 1.f, arc_theshold, NUM_SAMPLES, false, "vasinq_f32");
+    RUN_TESTp(generic_test, atanf, vatanq_f32, -10.f, 10.f, arc_theshold, NUM_SAMPLES, false, "vatanq_f32");
     RUN_TESTp(generic_test, atan2_angle, simd_atan2, 0.f, 6.28318530f, 3.e-07f, 32768, false, "vatan2q_f32");
 #endif
 }

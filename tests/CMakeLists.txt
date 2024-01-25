@@ -4,14 +4,17 @@ set(CMAKE_OSX_ARCHITECTURES arm64;x86_64)
 
 project(math_intrinsics_unit_tests)
 
-add_executable(test test.c math_intrinsics.c)
+add_executable(test_precision test.c math_intrinsics.c)
+add_executable(test_fast test.c math_intrinsics.c)
 
 if(LINUX)
     set(CMAKE_EXE_LINKER_FLAGS "-lm")
 endif()
 
 if(MSVC)
-    target_compile_options(test PRIVATE /W4 /WX /std:c17)
+    target_compile_options(test_precision PRIVATE /W4 /WX /std:c17)
+    target_compile_options(test_fast PRIVATE /W4 /WX /std:c17 /D__MATH_INTRINSINCS_FAST__)
 else()
-    target_compile_options(test PRIVATE -Wall -Wextra -Wpedantic -Werror -mavx2 -mfma)
+    target_compile_options(test_precision PRIVATE -Wall -Wextra -Wpedantic -Werror -mavx2 -mfma)
+    target_compile_options(test_fast PRIVATE -Wall -Wextra -Wpedantic -Werror -mavx2 -mfma -D__MATH_INTRINSINCS_FAST__)
 endif()
