@@ -102,8 +102,16 @@ float32x4_t vexp2q_f32(float32x4_t a);
 float32x4_t vcbrtq_f32(float32x4_t a);
 ```
 
-# __MATH_INTRINSINCS_FAST__
+# fast functions 
 
+If you use the macro __MATH_INTRINSINCS_FAST__ some functions will have less precision but better performances (2.5-4x):
+
+* sin, max_error : 2.682209015e-07
+* cos, max_error : 5.811452866e-07
+* acos, max_error : 6.520748138e-05
+* asin, max_error : 6.520736497e-05
+* atan, max_error : 6.699562073e-05
+* atan2, max_error : 4.768371582e-07
 
 
 # references
@@ -124,7 +132,7 @@ Here's the benchmark results on my old Intel Core i7 from 2018 (time for 32 bill
 * mm256_acos_ps : 24650ms
 * mm256_exp_ps : 24387ms
 
-You can use the macro __MATH_INTRINSINCS_FAST__ to get a x3-x5 boost with some precision lost.
+Use __MATH_INTRINSINCS_FAST__ if needed.
 
 ## why AVX2 ?
 
