@@ -20,6 +20,8 @@ On intel/AMD computer, you need to compile with **-mavx2**. You can add also -mf
 
 On ARM based computer nothing required as the lib is for AArch64
 
+You can use the macro __MATH_INTRINSINCS_FAST__ to generate faster albeit less precise functions (see below for more details)
+
 # functions
 
 ```C
@@ -100,6 +102,10 @@ float32x4_t vexp2q_f32(float32x4_t a);
 float32x4_t vcbrtq_f32(float32x4_t a);
 ```
 
+# __MATH_INTRINSINCS_FAST__
+
+
+
 # references
 
 [cephes math library](https://github.com/jeremybarnes/cephes/blob/master/single/)
@@ -118,9 +124,7 @@ Here's the benchmark results on my old Intel Core i7 from 2018 (time for 32 bill
 * mm256_acos_ps : 24650ms
 * mm256_exp_ps : 24387ms
 
-## is there a faster version with less precision?
-
-You can look at some approximations in my [simd](https://github.com/Geolm/simd/blob/main/extra/simd_approx_math.h) repo. It's not copy/paste friendly but you get the idea, also you can get the whole repo which contains only few files.
+You can use the macro __MATH_INTRINSINCS_FAST__ to get a x3-x5 boost with some precision lost.
 
 ## why AVX2 ?
 
