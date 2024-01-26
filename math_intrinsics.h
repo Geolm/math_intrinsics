@@ -304,64 +304,6 @@ static inline simd_vector simd_sign(simd_vector a)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-// based on https://github.com/jeremybarnes/cephes/blob/master/single/atanf.c
-#ifdef __MATH__INTRINSICS__NEON__
-    float32x4_t vatanq_f32(float32x4_t xx)
-#else
-    __m256 mm256_atan_ps(__m256 xx)
-#endif
-{	
-	simd_vector sign = simd_sign(xx);
-	simd_vector x = simd_abs(xx);
-	simd_vector one = simd_splat(1.f);
-
-	// range reduction
-	simd_vector above_3pi8 = simd_cmp_gt(x, simd_splat(2.414213562373095f));
-	simd_vector above_pi8 = simd_andnot(simd_cmp_gt(x, simd_splat(0.4142135623730950f)), above_3pi8);
-	simd_vector y = simd_splat_zero();
-	x = simd_select(x, simd_neg(simd_rcp(x)), above_3pi8);
-	x = simd_select(x, simd_div(simd_sub(x, one), simd_add(x, one)), above_pi8);
-	y = simd_select(y, simd_splat(SIMD_MATH_PI2), above_3pi8);
-	y = simd_select(y, simd_splat(SIMD_MATH_PI4), above_pi8);
-	
-	// minimax polynomial
-	simd_vector z = simd_mul(x, x);
-	simd_vector tmp = simd_polynomial4(z, (float[]) {8.05374449538e-2f, -1.38776856032E-1f, 1.99777106478E-1f, -3.33329491539E-1f});
-    tmp = simd_mul(tmp, z);
-	tmp = simd_fmad(tmp, x, x);
-	y = simd_add(tmp, y);
-	y = simd_mul(y, sign);
-	
-	return y;	
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-// based on https://mazzo.li/posts/vectorized-atan2.html
-#ifdef __MATH__INTRINSICS__NEON__
-    float32x4_t vatan2q_f32(float32x4_t x, float32x4_t y)
-#else
-    __m256 mm256_atan2_ps(__m256 x, __m256 y)
-#endif
-{
-    simd_vector swap = simd_cmp_lt(simd_abs(x), simd_abs(y));
-    simd_vector x_equals_zero = simd_cmp_eq(x, simd_splat_zero());
-    simd_vector y_equals_zero = simd_cmp_eq(y, simd_splat_zero());
-    simd_vector x_over_y = simd_div(x, y);
-    simd_vector y_over_x = simd_div(y, x);
-    simd_vector atan_input = simd_select(y_over_x, x_over_y, swap);
-    simd_vector result = simd_atan(atan_input);
-
-    simd_vector adjust = simd_select(simd_splat(-SIMD_MATH_PI2), simd_splat(SIMD_MATH_PI2), simd_cmp_ge(atan_input, simd_splat_zero()));
-    result = simd_select(result, simd_sub(adjust, result), swap);
-
-    simd_vector x_sign_mask = simd_cmp_lt(x, simd_splat_zero());
-    result = simd_add( simd_and(simd_xor(simd_splat(SIMD_MATH_PI), simd_and(simd_sign_mask(), y)), x_sign_mask), result);
-    result = simd_select(result, simd_mul(simd_sign(x), simd_splat_zero()), y_equals_zero);
-    result = simd_select(result, simd_mul(simd_sign(y), simd_splat(SIMD_MATH_PI2)), x_equals_zero);
-    return result;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
 // based on http://gruntthepeon.free.fr/ssemath/
 #ifdef __MATH__INTRINSICS__NEON__
     float32x4_t vlogq_f32(float32x4_t x)
@@ -606,8 +548,7 @@ static inline simd_vector simd_sign(simd_vector a)
     y2 = simd_fmad(y2, z, simd_splat(8.3321608736E-3f));
     y2 = simd_fmad(y2, z, simd_splat(-1.6666654611E-1f));
     y2 = simd_mul(y2, z);
-    y2 = simd_mul(y2, x);
-    y2 = simd_add(y2, x);
+    y2 = simd_fmad(y2, x, x);
 
     // select the correct result from the two polynoms
     xmm3 = poly_mask;
@@ -686,22 +627,20 @@ __m256 mm256_cos_ps(__m256 x)
     __m256 mm256_asin_ps(__m256 xx)
 #endif
 {
+    simd_vector output_nan = simd_cmp_gt(simd_abs(xx), simd_splat(1.f));
+    simd_vector small_value = simd_cmp_lt(simd_abs(xx), simd_splat(1.0e-4f));
+    simd_vector a  = simd_abs(xx);
 #ifdef __MATH_INTRINSINCS_FAST__
     // based on https://developer.download.nvidia.com/cg/asin.html
-    simd_vector x = xx;
-    simd_vector negate = simd_select(simd_splat_zero(), simd_splat(1.f), simd_cmp_lt(x, simd_splat_zero()));
-    x = simd_abs(x);
+    simd_vector negate = simd_select(simd_splat_zero(), simd_splat(1.f), simd_cmp_lt(xx, simd_splat_zero()));
+    simd_vector x = a;
     simd_vector result = simd_polynomial4(x, (float[]){-0.0187293f, 0.0742610f, -0.2121144f, 1.5707288f});
     result = simd_sub(simd_splat(SIMD_MATH_PI2), simd_mul(simd_sqrt(simd_sub(simd_splat(1.f), x)), result));
-    return simd_sub(result, simd_mul(simd_mul(simd_splat(2.f), result), negate));
+    result = simd_sub(result, simd_mul(simd_mul(simd_splat(2.f), result), negate));
 #else
     // based on https://github.com/jeremybarnes/cephes/blob/master/single/asinf.c
     simd_vector x = xx;
     simd_vector sign = simd_sign(xx);
-    simd_vector a  = simd_abs(x);
-    simd_vector greater_one = simd_cmp_gt(a, simd_splat(1.f));
-    simd_vector small_value = simd_cmp_lt(a, simd_splat(1.0e-4f));
-
     simd_vector z1 = simd_mul(simd_splat(.5f), simd_sub(simd_splat(1.f), a));
     simd_vector z2 = simd_mul(a, a);
     simd_vector flag = simd_cmp_gt(a, simd_splat(.5f));
@@ -717,12 +656,11 @@ __m256 mm256_cos_ps(__m256 x)
     tmp = simd_add(z, z);
     tmp = simd_sub(simd_splat(SIMD_MATH_PI2), tmp);
     z = simd_select(z, tmp, flag);
-
-    z = simd_select(z, a, small_value);
-    z = simd_select(z, simd_splat_zero(), greater_one);
-    z = simd_mul(z, sign);
-    return z;
+    simd_vector result = simd_mul(z, sign);
 #endif
+    result = simd_or(result, output_nan);
+    result = simd_select(result, xx, small_value);
+    return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -743,9 +681,67 @@ __m256 mm256_cos_ps(__m256 x)
 #else
     simd_vector out_of_bound = simd_cmp_gt(simd_abs(x), simd_splat(1.f));
     simd_vector result = simd_sub(simd_splat(SIMD_MATH_PI2), simd_asin(x));
-    result = simd_select(result, simd_splat_zero(), out_of_bound);
+    result = simd_or(result, out_of_bound); // out of bound outputs NAN
     return result;
 #endif
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// based on https://github.com/jeremybarnes/cephes/blob/master/single/atanf.c
+#ifdef __MATH__INTRINSICS__NEON__
+    float32x4_t vatanq_f32(float32x4_t xx)
+#else
+    __m256 mm256_atan_ps(__m256 xx)
+#endif
+{	
+	simd_vector sign = simd_sign(xx);
+	simd_vector x = simd_abs(xx);
+	simd_vector one = simd_splat(1.f);
+
+	// range reduction
+	simd_vector above_3pi8 = simd_cmp_gt(x, simd_splat(2.414213562373095f));
+	simd_vector above_pi8 = simd_andnot(simd_cmp_gt(x, simd_splat(0.4142135623730950f)), above_3pi8);
+	simd_vector y = simd_splat_zero();
+	x = simd_select(x, simd_neg(simd_rcp(x)), above_3pi8);
+	x = simd_select(x, simd_div(simd_sub(x, one), simd_add(x, one)), above_pi8);
+	y = simd_select(y, simd_splat(SIMD_MATH_PI2), above_3pi8);
+	y = simd_select(y, simd_splat(SIMD_MATH_PI4), above_pi8);
+	
+	// minimax polynomial
+	simd_vector z = simd_mul(x, x);
+	simd_vector tmp = simd_polynomial4(z, (float[]) {8.05374449538e-2f, -1.38776856032E-1f, 1.99777106478E-1f, -3.33329491539E-1f});
+    tmp = simd_mul(tmp, z);
+	tmp = simd_fmad(tmp, x, x);
+	y = simd_add(tmp, y);
+	y = simd_mul(y, sign);
+	
+	return y;	
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// based on https://mazzo.li/posts/vectorized-atan2.html
+#ifdef __MATH__INTRINSICS__NEON__
+    float32x4_t vatan2q_f32(float32x4_t x, float32x4_t y)
+#else
+    __m256 mm256_atan2_ps(__m256 x, __m256 y)
+#endif
+{
+    simd_vector swap = simd_cmp_lt(simd_abs(x), simd_abs(y));
+    simd_vector x_equals_zero = simd_cmp_eq(x, simd_splat_zero());
+    simd_vector y_equals_zero = simd_cmp_eq(y, simd_splat_zero());
+    simd_vector x_over_y = simd_div(x, y);
+    simd_vector y_over_x = simd_div(y, x);
+    simd_vector atan_input = simd_select(y_over_x, x_over_y, swap);
+    simd_vector result = simd_atan(atan_input);
+
+    simd_vector adjust = simd_select(simd_splat(-SIMD_MATH_PI2), simd_splat(SIMD_MATH_PI2), simd_cmp_ge(atan_input, simd_splat_zero()));
+    result = simd_select(result, simd_sub(adjust, result), swap);
+
+    simd_vector x_sign_mask = simd_cmp_lt(x, simd_splat_zero());
+    result = simd_add( simd_and(simd_xor(simd_splat(SIMD_MATH_PI), simd_and(simd_sign_mask(), y)), x_sign_mask), result);
+    result = simd_select(result, simd_mul(simd_sign(x), simd_splat_zero()), y_equals_zero);
+    result = simd_select(result, simd_mul(simd_sign(y), simd_splat(SIMD_MATH_PI2)), x_equals_zero);
+    return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

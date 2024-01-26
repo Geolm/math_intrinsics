@@ -242,6 +242,19 @@ SUITE(infinity_nan_compliance)
     RUN_TESTp(value_expected, 0.f, 1.f, mm256_cos_ps);
     RUN_TESTp(value_expected, -0.f, 1.f, mm256_cos_ps);
 
+    // asin
+    RUN_TESTp(nan_expected, not_a_number, mm256_asin_ps);
+    RUN_TESTp(nan_expected, 2.f, mm256_asin_ps);
+    RUN_TESTp(nan_expected, -2.f, mm256_asin_ps);
+    RUN_TESTp(value_expected, 0.f, 0.f, mm256_asin_ps);
+    RUN_TESTp(value_expected, -0.f, -0.f, mm256_asin_ps);
+
+    // acos
+    RUN_TESTp(nan_expected, not_a_number, mm256_acos_ps);
+    RUN_TESTp(nan_expected, 2.f, mm256_acos_ps);
+    RUN_TESTp(nan_expected, -2.f, mm256_acos_ps);
+    RUN_TESTp(value_expected, 1.f, 0.f, mm256_acos_ps);
+
 #else
     RUN_TESTp(nan_expected, -1.f, vlogq_f32);
     RUN_TESTp(nan_expected, not_a_number, vlogq_f32);
@@ -282,6 +295,19 @@ SUITE(infinity_nan_compliance)
     RUN_TESTp(nan_expected, negative_inf, vcosq_f32);
     RUN_TESTp(value_expected, 0.f, 1.f, vcosq_f32);
     RUN_TESTp(value_expected, -0.f, 1.f, vcosq_f32);
+
+    // asin
+    RUN_TESTp(nan_expected, not_a_number, vasinq_f32);
+    RUN_TESTp(nan_expected, 2.f, vasinq_f32);
+    RUN_TESTp(nan_expected, -2.f, vasinq_f32);
+    RUN_TESTp(value_expected, 0.f, 0.f, vasinq_f32);
+    RUN_TESTp(value_expected, -0.f, -0.f, vasinq_f32);
+
+    // acos
+    RUN_TESTp(nan_expected, not_a_number, vacosq_f32);
+    RUN_TESTp(nan_expected, 2.f, vacosq_f32);
+    RUN_TESTp(nan_expected, -2.f, vacosq_f32);
+    RUN_TESTp(value_expected, 1.f, 0.f, vacosq_f32);
 #endif
 }
 
