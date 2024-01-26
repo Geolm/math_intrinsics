@@ -429,6 +429,10 @@ static inline simd_vector simd_sign(simd_vector a)
     __m256 mm256_log2_ps(__m256 x)
 #endif
 {
+    simd_vector invalid_mask = simd_cmp_le(x, simd_splat_zero());
+    invalid_mask = simd_or(invalid_mask, simd_isnan(x));
+    simd_vector input_is_zero = simd_cmp_eq(x, simd_splat_zero());
+    simd_vector input_is_infinity = simd_cmp_eq(x, simd_splat_positive_infinity());
     simd_vector one = simd_splat(1.f);
     simd_vectori exp = simd_splat_i(0x7f800000);
     simd_vectori mant = simd_splat_i(0x007fffff);
@@ -443,13 +447,9 @@ static inline simd_vector simd_sign(simd_vector a)
     p = simd_mul(p, simd_sub(m, one));
     simd_vector result = simd_add(p, e);
 
-    // we can't compute a logarithm beyond this value, so we'll mark it as -infinity to indicate close to 0
-    simd_vector ltminus127 = simd_cmp_le(result, simd_splat(-127.f));
-    result = simd_select(result, simd_splat_negative_infinity(), ltminus127);
-
-    // Check for negative values and return NaN
-    simd_vector lt0 = simd_cmp_lt(x, simd_splat_zero());
-    result = simd_select(result, simd_splat_nan(), lt0);
+    result = simd_or(result, invalid_mask); // NAN/negative arg will be NAN
+    result = simd_select(result, simd_splat_negative_infinity(), input_is_zero); // zero arg will be -inf
+    result = simd_select(result, simd_splat_positive_infinity(), input_is_infinity); // +inf arg will be +inf
 
     return result;
 }

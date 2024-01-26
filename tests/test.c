@@ -113,8 +113,8 @@ TEST nan_expected(float input, approximation_function function)
     ASSERT(isnan(result));
 #else
     float32x4_t v_input = vdupq_n_f32(input);
-    float32x4_t v_result = function(v_input);
-    ASSERT(vmaxvq_u32(vcleq_f32(v_result, v_result)) == 0);
+    float result = vgetq_lane_f32(function(v_input), 0);
+    ASSERT(isnan(result));
 #endif
 
     PASS();
@@ -204,12 +204,24 @@ SUITE(infinity_nan_compliance)
     RUN_TESTp(value_expected,  1.f, 0.f, mm256_log_ps);
     RUN_TESTp(value_expected,  0.f, negative_inf, mm256_log_ps);
     RUN_TESTp(value_expected,  positive_inf, positive_inf, mm256_log_ps);
+
+    RUN_TESTp(nan_expected, -1.f, mm256_log2_ps);
+    RUN_TESTp(nan_expected, not_a_number, mm256_log2_ps);
+    RUN_TESTp(value_expected,  1.f, 0.f, mm256_log2_ps);
+    RUN_TESTp(value_expected,  0.f, negative_inf, mm256_log2_ps);
+    RUN_TESTp(value_expected,  positive_inf, positive_inf, mm256_log2_ps);
 #else
     RUN_TESTp(nan_expected, -1.f, vlogq_f32);
     RUN_TESTp(nan_expected, not_a_number, vlogq_f32);
     RUN_TESTp(value_expected,  1.f, 0.f, vlogq_f32);
     RUN_TESTp(value_expected,  0.f, negative_inf, vlogq_f32);
     RUN_TESTp(value_expected,  positive_inf, positive_inf, vlogq_f32);
+
+    RUN_TESTp(nan_expected, -1.f, vlog2q_f32);
+    RUN_TESTp(nan_expected, not_a_number, vlog2q_f32);
+    RUN_TESTp(value_expected,  1.f, 0.f, vlog2q_f32);
+    RUN_TESTp(value_expected,  0.f, negative_inf, vlog2q_f32);
+    RUN_TESTp(value_expected,  positive_inf, positive_inf, vlog2q_f32);
 #endif
 }
 
