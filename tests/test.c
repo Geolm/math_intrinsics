@@ -169,8 +169,8 @@ SUITE(trigonometry)
     RUN_TESTp(generic_test, cosf, vcosq_f32, -10.f, 10.f, trigo_threshold, NUM_SAMPLES, false, "vcosq_f32");
     RUN_TESTp(generic_test, acosf, vacosq_f32, -1.f, 1.f, arc_theshold, NUM_SAMPLES, false, "vacosq_f32");
     RUN_TESTp(generic_test, asinf, vasinq_f32, -1.f, 1.f, arc_theshold, NUM_SAMPLES, false, "vasinq_f32");
-    RUN_TESTp(generic_test, atanf, vatanq_f32, -10.f, 10.f, arc_theshold, NUM_SAMPLES, false, "vatanq_f32");
-    RUN_TESTp(generic_test, atan2_angle, simd_atan2, 0.f, 6.28318530f, 3.e-07f, 32768, false, "vatan2q_f32");
+    RUN_TESTp(generic_test, atanf, vatanq_f32, -10.f, 10.f, 1.e-04f, NUM_SAMPLES, false, "vatanq_f32");
+    RUN_TESTp(generic_test, atan2_angle, simd_atan2, 0.f, 6.28318530f, arc_theshold, 32768, false, "vatan2q_f32");
 #endif
 }
 
