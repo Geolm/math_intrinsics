@@ -89,6 +89,39 @@ TEST generic_test(reference_function ref, approximation_function approx, float r
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+TEST value_expected(float input, float target, approximation_function function)
+{
+#ifdef __MATH__INTRINSICS__AVX__
+    __m256 v_input = _mm256_set1_ps(input);
+    float result = _mm256_cvtss_f32(function(v_input));
+    ASSERT_EQ_FMT(target, result, "%f");
+#else
+    float32x4_t v_input = vdupq_n_f32(input);
+    float result = vgetq_lane_f32(function(v_input), 0);
+    ASSERT_EQ_FMT(target, result, "%f");
+#endif
+
+    PASS();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+TEST nan_expected(float input, approximation_function function)
+{
+#ifdef __MATH__INTRINSICS__AVX__
+    __m256 v_input = _mm256_set1_ps(input);
+    float result = _mm256_cvtss_f32(function(v_input));
+    ASSERT(isnan(result));
+#else
+    float32x4_t v_input = vdupq_n_f32(input);
+    float32x4_t v_result = function(v_input);
+    ASSERT(vmaxvq_u32(vcleq_f32(v_result, v_result)) == 0);
+#endif
+
+    PASS();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 float atan2_angle(float angle) {return atan2f(sinf(angle) * (angle + 1.f), cosf(angle) * (angle + 1.f));}
 
 #ifdef __MATH__INTRINSICS__AVX__
@@ -159,6 +192,27 @@ SUITE(exponentiation)
 #endif
 }
 
+SUITE(infinity_nan_compliant)
+{
+    const float positive_inf = 1.f / 0.f;
+    const float negative_inf = -1.f / 0.f;
+    const float not_a_number = 0.f / 0.f;
+
+#ifdef __MATH__INTRINSICS__AVX__
+    RUN_TESTp(nan_expected, -1.f, mm256_log_ps);
+    RUN_TESTp(nan_expected, not_a_number, mm256_log_ps);
+    RUN_TESTp(value_expected,  1.f, 0.f, mm256_log_ps);
+    RUN_TESTp(value_expected,  0.f, negative_inf, mm256_log_ps);
+    RUN_TESTp(value_expected,  positive_inf, positive_inf, mm256_log_ps);
+#else
+    RUN_TESTp(nan_expected, -1.f, vlogq_f32);
+    RUN_TESTp(nan_expected, not_a_number, vlogq_f32);
+    RUN_TESTp(value_expected,  1.f, 0.f, vlogq_f32);
+    RUN_TESTp(value_expected,  0.f, negative_inf, vlogq_f32);
+    RUN_TESTp(value_expected,  positive_inf, positive_inf, vlogq_f32);
+#endif
+}
+
 GREATEST_MAIN_DEFS();
 
 int main(int argc, char * argv[])
@@ -167,7 +221,11 @@ int main(int argc, char * argv[])
 
     RUN_SUITE(trigonometry);
     RUN_SUITE(exponentiation);
+    RUN_SUITE(infinity_nan_compliant);
 
     GREATEST_MAIN_END();
+
+    (void)nan_expected;
+    (void)value_expected;
 }
 

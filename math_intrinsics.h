@@ -129,6 +129,8 @@ extern "C" {
     static inline simd_vector simd_cmp_lt(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(vcltq_f32(a, b));}
     static inline simd_vector simd_cmp_le(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(vcleq_f32(a, b));}
     static inline simd_vector simd_cmp_eq(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(vceqq_f32(a, b));}
+    static inline simd_vector simd_cmp_neq(simd_vector a, simd_vector b) {return vreinterpretq_f32_u32(vmvnq_u32(vceqq_f32(a, b)));}
+    static inline simd_vector simd_isnan(simd_vector a) {return simd_cmp_neq(a, a);}
     static inline simd_vector simd_select(simd_vector a, simd_vector b, simd_vector mask) {return vbslq_f32(vreinterpretq_u32_f32(mask), b, a);}
     static inline simd_vector simd_splat(float value) {return vdupq_n_f32(value);}
     static inline simd_vector simd_splat_zero(void) {return vdupq_n_f32(0);}
@@ -210,6 +212,8 @@ extern "C" {
     static inline simd_vector simd_cmp_lt(simd_vector a, simd_vector b) {return _mm256_cmp_ps(a, b, _CMP_LT_OQ);}
     static inline simd_vector simd_cmp_le(simd_vector a, simd_vector b) {return _mm256_cmp_ps(a, b, _CMP_LE_OQ);}
     static inline simd_vector simd_cmp_eq(simd_vector a, simd_vector b) {return _mm256_cmp_ps(a, b, _CMP_EQ_OQ);}
+    static inline simd_vector simd_cmp_neq(simd_vector a, simd_vector b) {return _mm256_cmp_ps(a, b, _CMP_NEQ_OQ);}
+    static inline simd_vector simd_isnan(simd_vector a) {return _mm256_cmp_ps(a, a, _CMP_NEQ_UQ);}
     static inline simd_vector simd_sqrt(simd_vector a) {return _mm256_sqrt_ps(a);}
     static inline simd_vector simd_neg(simd_vector a) {return _mm256_xor_ps(a, simd_sign_mask());}
     static inline simd_vector simd_rcp(simd_vector a) {return _mm256_rcp_ps(a);}
@@ -367,6 +371,10 @@ static inline simd_vector simd_sign(simd_vector a)
 {
     simd_vector one = simd_splat(1.f);
     simd_vector invalid_mask = simd_cmp_le(x, simd_splat_zero());
+    invalid_mask = simd_or(invalid_mask, simd_isnan(x));
+    simd_vector input_is_zero = simd_cmp_eq(x, simd_splat_zero());
+    simd_vector input_is_infinity = simd_cmp_eq(x, simd_splat_positive_infinity());
+
     x = simd_max(x, simd_min_normalized());  // cut off denormalized stuff
 
     simd_vectori emm0 = simd_shift_right_i(simd_cast_from_float(x), 23);
@@ -406,7 +414,9 @@ static inline simd_vector simd_sign(simd_vector a)
     tmp = simd_mul(e, simd_splat(0.693359375f));
     x = simd_add(x, y);
     x = simd_add(x, tmp);
-    x = simd_or(x, invalid_mask); // negative arg will be NAN
+    x = simd_or(x, invalid_mask); // NAN/negative arg will be NAN
+    x = simd_select(x, simd_splat_negative_infinity(), input_is_zero); // zero arg will be -inf
+    x = simd_select(x, simd_splat_positive_infinity(), input_is_infinity); // +inf arg will be +inf
 
     return x;
 }
