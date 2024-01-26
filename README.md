@@ -135,7 +135,7 @@ Here's the benchmark results on my old Intel Core i7 from 2018 (time for 32 bill
 * mm256_acos_ps : 24650ms
 * mm256_exp_ps : 24387ms
 
-Use __MATH_INTRINSINCS_FAST__ if needed.
+Use \_\_MATH_INTRINSINCS_FAST\_\_ if needed.
 
 ## why AVX2 ?
 
@@ -143,5 +143,8 @@ On multiple functions this library use a float as an int to have access to the m
 
 ## does it handle all float cases (+inf, -inf, NAN) as the C math lib?
 
-No, infinity, NAN are not supported as input.
+Yes, all functions (even the fast ones) are compliant to +inf, -inf, NAN and other special cases (for example log(-4) == NAN). All based on the doc found here https://en.cppreference.com/w/
 
+## what's tested?
+
+The unit tests cover precision and special cases (inf, nan, ...). At the moment, the Neon version is not ran on GitHub but rather manually on my M1 Pro machine as I didn't had time to setup the emulator properly. 

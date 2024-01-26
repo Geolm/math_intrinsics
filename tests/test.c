@@ -2,6 +2,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#define _USE_MATH_DEFINES
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -255,6 +257,18 @@ SUITE(infinity_nan_compliance)
     RUN_TESTp(nan_expected, -2.f, mm256_acos_ps);
     RUN_TESTp(value_expected, 1.f, 0.f, mm256_acos_ps);
 
+    // atan
+    RUN_TESTp(nan_expected, not_a_number, mm256_atan_ps);
+    RUN_TESTp(value_expected, 0.f, 0.f, mm256_atan_ps);
+    RUN_TESTp(value_expected, -0.f, -0.f, mm256_atan_ps);
+    RUN_TESTp(value_expected, positive_inf, (float)M_PI_2, mm256_atan_ps);
+    RUN_TESTp(value_expected, negative_inf, (float)-M_PI_2, mm256_atan_ps);
+
+    // cbrt
+    RUN_TESTp(nan_expected, not_a_number, mm256_cbrt_ps);
+    RUN_TESTp(value_expected, 0.f, 0.f, mm256_cbrt_ps);
+    RUN_TESTp(value_expected, -0.f, -0.f, mm256_cbrt_ps);
+
 #else
     RUN_TESTp(nan_expected, -1.f, vlogq_f32);
     RUN_TESTp(nan_expected, not_a_number, vlogq_f32);
@@ -308,6 +322,18 @@ SUITE(infinity_nan_compliance)
     RUN_TESTp(nan_expected, 2.f, vacosq_f32);
     RUN_TESTp(nan_expected, -2.f, vacosq_f32);
     RUN_TESTp(value_expected, 1.f, 0.f, vacosq_f32);
+
+    // atan
+    RUN_TESTp(nan_expected, not_a_number, vatanq_f32);
+    RUN_TESTp(value_expected, 0.f, 0.f, vatanq_f32);
+    RUN_TESTp(value_expected, -0.f, -0.f, vatanq_f32);
+    RUN_TESTp(value_expected, positive_inf, (float)M_PI_2, vatanq_f32);
+    RUN_TESTp(value_expected, negative_inf, (float)-M_PI_2, vatanq_f32);
+
+    // cbrt
+    RUN_TESTp(nan_expected, not_a_number, vcbrtq_f32);
+    RUN_TESTp(value_expected, 0.f, 0.f, vcbrtq_f32);
+    RUN_TESTp(value_expected, -0.f, -0.f, vcbrtq_f32);
 #endif
 }
 
