@@ -192,11 +192,11 @@ SUITE(exponentiation)
 #endif
 }
 
-SUITE(infinity_nan_compliant)
+SUITE(infinity_nan_compliance)
 {
-    const float positive_inf = 1.f / 0.f;
-    const float negative_inf = -1.f / 0.f;
-    const float not_a_number = 0.f / 0.f;
+    const float positive_inf = INFINITY;
+    const float negative_inf = -INFINITY;
+    const float not_a_number = nanf("");
 
 #ifdef __MATH__INTRINSICS__AVX__
     RUN_TESTp(nan_expected, -1.f, mm256_log_ps);
@@ -221,7 +221,7 @@ int main(int argc, char * argv[])
 
     RUN_SUITE(trigonometry);
     RUN_SUITE(exponentiation);
-    RUN_SUITE(infinity_nan_compliant);
+    RUN_SUITE(infinity_nan_compliance);
 
     GREATEST_MAIN_END();
 
