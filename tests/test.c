@@ -228,6 +228,20 @@ SUITE(infinity_nan_compliance)
     RUN_TESTp(value_expected, positive_inf, positive_inf, mm256_exp2_ps);
     RUN_TESTp(value_expected, negative_inf, 0.f, mm256_exp2_ps);
 
+    // sin
+    RUN_TESTp(nan_expected, not_a_number, mm256_sin_ps);
+    RUN_TESTp(nan_expected, positive_inf, mm256_sin_ps);
+    RUN_TESTp(nan_expected, negative_inf, mm256_sin_ps);
+    RUN_TESTp(value_expected, 0.f, 0.f, mm256_sin_ps);
+    RUN_TESTp(value_expected, -0.f, -0.f, mm256_sin_ps);
+
+    // cos
+    RUN_TESTp(nan_expected, not_a_number, mm256_cos_ps);
+    RUN_TESTp(nan_expected, positive_inf, mm256_cos_ps);
+    RUN_TESTp(nan_expected, negative_inf, mm256_cos_ps);
+    RUN_TESTp(value_expected, 0.f, 1.f, mm256_cos_ps);
+    RUN_TESTp(value_expected, -0.f, 1.f, mm256_cos_ps);
+
 #else
     RUN_TESTp(nan_expected, -1.f, vlogq_f32);
     RUN_TESTp(nan_expected, not_a_number, vlogq_f32);
@@ -254,6 +268,20 @@ SUITE(infinity_nan_compliance)
     RUN_TESTp(value_expected,-0.f, 1.f, vexp2q_f32);
     RUN_TESTp(value_expected, positive_inf, positive_inf, vexp2q_f32);
     RUN_TESTp(value_expected, negative_inf, 0.f, vexp2q_f32);
+
+    // sin
+    RUN_TESTp(nan_expected, not_a_number, vsinq_f32);
+    RUN_TESTp(nan_expected, positive_inf, vsinq_f32);
+    RUN_TESTp(nan_expected, negative_inf, vsinq_f32);
+    RUN_TESTp(value_expected, 0.f, 0.f, vsinq_f32);
+    RUN_TESTp(value_expected, -0.f, -0.f, vsinq_f32);
+
+    // cos
+    RUN_TESTp(nan_expected, not_a_number, vcosq_f32);
+    RUN_TESTp(nan_expected, positive_inf, vcosq_f32);
+    RUN_TESTp(nan_expected, negative_inf, vcosq_f32);
+    RUN_TESTp(value_expected, 0.f, 1.f, vcosq_f32);
+    RUN_TESTp(value_expected, -0.f, 1.f, vcosq_f32);
 #endif
 }
 
