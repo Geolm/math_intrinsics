@@ -454,29 +454,44 @@ static inline simd_vector simd_sign(simd_vector a)
 {
     simd_vector invalid_mask = simd_isnan(x);
     simd_vector input_is_infinity = simd_cmp_eq(x, simd_splat_positive_infinity());
+    simd_vector equal_to_zero = simd_cmp_eq(x, simd_splat_zero());
+    simd_vector one = simd_splat(1.f);
 
+#ifdef __MATH_INTRINSINCS_FAST__
     // clamp values
     x = simd_clamp(x, simd_splat(-127.f), simd_splat(127.f));
-    simd_vector equal_to_zero = simd_cmp_eq(x, simd_splat_zero());
+
+    simd_vector ipart = simd_floor(x);
+    simd_vector fpart = simd_sub(x, ipart);
+
+    simd_vectori i = simd_shift_left_i(simd_add_i(simd_convert_from_float(ipart), simd_splat_i(127)), 23);
+    simd_vector expipart = simd_cast_from_int(i);
+
+    // minimax polynomial fit of 2^x, in range [-0.5, 0.5[
+    simd_vector expfpart = simd_polynomial6(fpart, (float[]) {1.8775767e-3f, 8.9893397e-3f, 5.5826318e-2f, 2.4015361e-1f, 6.9315308e-1f, 1.f});
+    simd_vector result = simd_mul(expipart, expfpart);
+#else
+    // clamp values
+    x = simd_clamp(x, simd_splat(-127.f), simd_splat(127.f));
 
     simd_vector i0 = simd_floor(x);
     x = simd_sub(x, i0);
 
     simd_vector above_half = simd_cmp_gt(x, simd_splat(.5f));
-    simd_vector one = simd_splat(1.f);
     i0 = simd_select(i0, simd_add(i0, one), above_half);
     x = simd_select(x, simd_sub(x, one), above_half);
 
     simd_vector px = simd_polynomial6(x, (float[]) {1.535336188319500E-004f, 1.339887440266574E-003f, 9.618437357674640E-003f,
                                                     5.550332471162809E-002f, 2.402264791363012E-001f, 6.931472028550421E-001f});
     px = simd_fmad(px, x,  one);
-    px = simd_ldexp(px, i0);
+    simd_vector result = simd_ldexp(px, i0);
+#endif
 
-    simd_vector result = simd_select(px, one, equal_to_zero);
+    result = simd_select(result, one, equal_to_zero);
     result = simd_or(result, invalid_mask);
     result = simd_select(result, simd_splat_positive_infinity(), input_is_infinity); // +inf arg will be +inf
-
     return result;
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------

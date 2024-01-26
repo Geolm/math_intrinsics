@@ -144,9 +144,11 @@ float32x4_t simd_atan2(float32x4_t angle)
 
 #ifdef __MATH_INTRINSINCS_FAST__
 static const float trigo_threshold = 1.e-06f;
+static const float exp_threshold = 3.e-07f;
 static const float arc_theshold = 1.e-04f;
 #else
 static const float trigo_threshold = FLT_EPSILON;
+static const float exp_threshold = 2.e-07f;
 static const float arc_theshold = 1.e-06f;
 #endif
 
@@ -182,14 +184,14 @@ SUITE(exponentiation)
 #ifdef __MATH__INTRINSICS__AVX__
     RUN_TESTp(generic_test, logf, mm256_log_ps, FLT_EPSILON, 1.e20f, 1.e-07f, 32768, true, "mm256_log_ps");
     RUN_TESTp(generic_test, log2f, mm256_log2_ps, FLT_EPSILON, 1.e20f, 3.e-07f, 32768, true, "mm256_log2_ps");
-    RUN_TESTp(generic_test, expf, mm256_exp_ps, -87.f, 87.f, 2.e-07f, NUM_SAMPLES, true, "mm256_exp_ps");
-    RUN_TESTp(generic_test, exp2f, mm256_exp2_ps, -126.f, 126.f, 2.e-07f, NUM_SAMPLES, true, "mm256_exp2");
+    RUN_TESTp(generic_test, expf, mm256_exp_ps, -87.f, 87.f, exp_threshold, NUM_SAMPLES, true, "mm256_exp_ps");
+    RUN_TESTp(generic_test, exp2f, mm256_exp2_ps, -126.f, 126.f, exp_threshold, NUM_SAMPLES, true, "mm256_exp2");
     RUN_TESTp(generic_test, cbrtf, mm256_cbrt_ps, -1000.f, 1000.f, 2.e-07f, 4096, true, "mm256_cbrt_ps");
 #else
     RUN_TESTp(generic_test, logf, vlogq_f32, FLT_EPSILON, 1.e20f, 1.e-07f, 32768, true, "vlogq_f32");
     RUN_TESTp(generic_test, log2f, vlog2q_f32, FLT_EPSILON, 1.e20f, 3.e-07f, 32768, true, "vlog2q_f32");
-    RUN_TESTp(generic_test, expf, vexpq_f32, -87.f, 87.f, 2.e-07f, NUM_SAMPLES, true, "vexpq_f32");
-    RUN_TESTp(generic_test, exp2f, vexp2q_f32, -126.f, 126.f, 2.e-07f, NUM_SAMPLES, true, "vexp2q_f32");
+    RUN_TESTp(generic_test, expf, vexpq_f32, -87.f, 87.f, exp_threshold, NUM_SAMPLES, true, "vexpq_f32");
+    RUN_TESTp(generic_test, exp2f, vexp2q_f32, -126.f, 126.f, exp_threshold, NUM_SAMPLES, true, "vexp2q_f32");
     RUN_TESTp(generic_test, cbrtf, vcbrtq_f32, -1000.f, 1000.f, 2.e-07f, 4096, true, "vcbrtq_f32");
 #endif
 }
