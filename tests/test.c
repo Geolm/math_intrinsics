@@ -199,17 +199,35 @@ SUITE(infinity_nan_compliance)
     const float not_a_number = nanf("");
 
 #ifdef __MATH__INTRINSICS__AVX__
+
+    // log
     RUN_TESTp(nan_expected, -1.f, mm256_log_ps);
     RUN_TESTp(nan_expected, not_a_number, mm256_log_ps);
     RUN_TESTp(value_expected,  1.f, 0.f, mm256_log_ps);
     RUN_TESTp(value_expected,  0.f, negative_inf, mm256_log_ps);
     RUN_TESTp(value_expected,  positive_inf, positive_inf, mm256_log_ps);
 
+    // log2
     RUN_TESTp(nan_expected, -1.f, mm256_log2_ps);
     RUN_TESTp(nan_expected, not_a_number, mm256_log2_ps);
     RUN_TESTp(value_expected,  1.f, 0.f, mm256_log2_ps);
     RUN_TESTp(value_expected,  0.f, negative_inf, mm256_log2_ps);
     RUN_TESTp(value_expected,  positive_inf, positive_inf, mm256_log2_ps);
+
+    // exp
+    RUN_TESTp(nan_expected, not_a_number, mm256_exp_ps);
+    RUN_TESTp(value_expected, 0.f, 1.f, mm256_exp_ps);
+    RUN_TESTp(value_expected,-0.f, 1.f, mm256_exp_ps);
+    RUN_TESTp(value_expected, positive_inf, positive_inf, mm256_exp_ps);
+    RUN_TESTp(value_expected, negative_inf, 0.f, mm256_exp_ps);
+
+    // exp2
+    RUN_TESTp(nan_expected, not_a_number, mm256_exp2_ps);
+    RUN_TESTp(value_expected, 0.f, 1.f, mm256_exp2_ps);
+    RUN_TESTp(value_expected,-0.f, 1.f, mm256_exp2_ps);
+    RUN_TESTp(value_expected, positive_inf, positive_inf, mm256_exp2_ps);
+    RUN_TESTp(value_expected, negative_inf, 0.f, mm256_exp2_ps);
+
 #else
     RUN_TESTp(nan_expected, -1.f, vlogq_f32);
     RUN_TESTp(nan_expected, not_a_number, vlogq_f32);
@@ -222,6 +240,20 @@ SUITE(infinity_nan_compliance)
     RUN_TESTp(value_expected,  1.f, 0.f, vlog2q_f32);
     RUN_TESTp(value_expected,  0.f, negative_inf, vlog2q_f32);
     RUN_TESTp(value_expected,  positive_inf, positive_inf, vlog2q_f32);
+
+    // exp
+    RUN_TESTp(nan_expected, not_a_number, vexpq_f32);
+    RUN_TESTp(value_expected, 0.f, 1.f, vexpq_f32);
+    RUN_TESTp(value_expected,-0.f, 1.f, vexpq_f32);
+    RUN_TESTp(value_expected, positive_inf, positive_inf, vexpq_f32);
+    RUN_TESTp(value_expected, negative_inf, 0.f, vexpq_f32);
+
+    // exp2
+    RUN_TESTp(nan_expected, not_a_number, vexp2q_f32);
+    RUN_TESTp(value_expected, 0.f, 1.f, vexp2q_f32);
+    RUN_TESTp(value_expected,-0.f, 1.f, vexp2q_f32);
+    RUN_TESTp(value_expected, positive_inf, positive_inf, vexp2q_f32);
+    RUN_TESTp(value_expected, negative_inf, 0.f, vexp2q_f32);
 #endif
 }
 

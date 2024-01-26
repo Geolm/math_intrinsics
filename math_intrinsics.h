@@ -462,6 +462,8 @@ static inline simd_vector simd_sign(simd_vector a)
     __m256 mm256_exp_ps(__m256 x)
 #endif
 {
+    simd_vector invalid_mask = simd_isnan(x);
+    simd_vector input_is_infinity = simd_cmp_eq(x, simd_splat_positive_infinity());
     simd_vector tmp = simd_splat_zero();
     simd_vector fx;
     simd_vector one = simd_splat(1.f);
@@ -493,8 +495,11 @@ static inline simd_vector simd_sign(simd_vector a)
     emm0 = simd_shift_left_i(emm0, 23);
     simd_vector pow2n = simd_cast_from_int(emm0);
 
-    y = simd_mul(y, pow2n);
-    return y;
+    simd_vector result = simd_mul(y, pow2n);
+    result = simd_or(result, invalid_mask);
+    result = simd_select(result, simd_splat_positive_infinity(), input_is_infinity); // +inf arg will be +inf
+
+    return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -505,6 +510,9 @@ static inline simd_vector simd_sign(simd_vector a)
     __m256 mm256_exp2_ps(__m256 x)
 #endif
 {
+    simd_vector invalid_mask = simd_isnan(x);
+    simd_vector input_is_infinity = simd_cmp_eq(x, simd_splat_positive_infinity());
+
     // clamp values
     x = simd_clamp(x, simd_splat(-127.f), simd_splat(127.f));
     simd_vector equal_to_zero = simd_cmp_eq(x, simd_splat_zero());
@@ -522,7 +530,11 @@ static inline simd_vector simd_sign(simd_vector a)
     px = simd_fmad(px, x,  one);
     px = simd_ldexp(px, i0);
 
-    return simd_select(px, one, equal_to_zero);
+    simd_vector result = simd_select(px, one, equal_to_zero);
+    result = simd_or(result, invalid_mask);
+    result = simd_select(result, simd_splat_positive_infinity(), input_is_infinity); // +inf arg will be +inf
+
+    return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
