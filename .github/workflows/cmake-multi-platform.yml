@@ -32,9 +32,9 @@ jobs:
       working-directory: ${{github.workspace}}/
       run: ./benchmark_precision
 
-    - name: Benchmark test
+    - name: Benchmark fast
       working-directory: ${{github.workspace}}/
-      run: ./benchmark_test
+      run: ./benchmark_fast
       
   build-macos:
     name: macos
@@ -61,9 +61,9 @@ jobs:
       working-directory: ${{github.workspace}}/
       run: ./benchmark_precision
 
-    - name: Benchmark test
+    - name: Benchmark fast
       working-directory: ${{github.workspace}}/
-      run: ./benchmark_test
+      run: ./benchmark_fast
       
   build-windows:
     name: windows
@@ -92,6 +92,6 @@ jobs:
       working-directory:  ${{github.workspace}}\tests\Debug
       run: ./benchmark_precision
 
-    - name: Benchmark test
+    - name: Benchmark fast
       working-directory:  ${{github.workspace}}\tests\Debug
-      run: ./benchmark_test
+      run: ./benchmark_fast
