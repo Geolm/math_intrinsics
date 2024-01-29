@@ -87,11 +87,3 @@ jobs:
     - name: Test fast
       working-directory:  ${{github.workspace}}\tests\Debug
       run: ./test_fast
-
-    - name: Benchmark precision
-      working-directory:  ${{github.workspace}}\tests\Debug
-      run: ./benchmark_precision
-
-    - name: Benchmark fast
-      working-directory:  ${{github.workspace}}\tests\Debug
-      run: ./benchmark_fast
