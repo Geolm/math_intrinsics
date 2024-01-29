@@ -113,6 +113,7 @@ If you use the macro \_\_MATH_INTRINSINCS_FAST\_\_ some functions will have less
 * cos, max_error : 5.811452866e-07
 * acos, max_error : 6.520748138e-05
 * asin, max_error : 6.520736497e-05
+* exp2, max_error : 2.317290893e-07
 
 # references
 
