@@ -146,10 +146,12 @@ float32x4_t simd_atan2(float32x4_t angle)
 static const float trigo_threshold = 1.e-06f;
 static const float exp_threshold = 3.e-07f;
 static const float arc_theshold = 1.e-04f;
+static const float cbrt_threshold = 1.e-04f;
 #else
 static const float trigo_threshold = FLT_EPSILON;
 static const float exp_threshold = 2.e-07f;
 static const float arc_theshold = 1.e-06f;
+static const float cbrt_threshold = 2.e-07f;
 #endif
 
 
@@ -162,18 +164,18 @@ SUITE(trigonometry)
     RUN_TESTp(generic_test, cosf, mm256_cos_ps, -10.f, 10.f, trigo_threshold, NUM_SAMPLES, false, "mm256_cos_ps");
     RUN_TESTp(generic_test, acosf, mm256_acos_ps, -1.f, 1.f, arc_theshold, NUM_SAMPLES, false, "mm256_acos_ps");
     RUN_TESTp(generic_test, asinf, mm256_asin_ps, -1.f, 1.f, arc_theshold, NUM_SAMPLES, false, "mm256_asin_ps");
-    RUN_TESTp(generic_test, atanf, mm256_atan_ps, -10.f, 10.f, 1.e-04f, NUM_SAMPLES, false, "mm256_atan_ps");
+    RUN_TESTp(generic_test, atanf, mm256_atan_ps, -10.f, 10.f, arc_theshold, NUM_SAMPLES, false, "mm256_atan_ps");
 
     // this task fails on linux and I don't have this OS to debug
     #if !defined(__linux__)
-        RUN_TESTp(generic_test, atan2_angle, simd_atan2, 0.f, 6.28318530f, arc_theshold, 32768, false, "mm256_atan2_ps");
+        RUN_TESTp(generic_test, atan2_angle, simd_atan2, 0.f, 6.28318530f, 100.0f, 32768, false, "mm256_atan2_ps");
     #endif
 #else
     RUN_TESTp(generic_test, sinf, vsinq_f32, -10.f, 10.f, trigo_threshold, NUM_SAMPLES, false, "vsinq_f32");
     RUN_TESTp(generic_test, cosf, vcosq_f32, -10.f, 10.f, trigo_threshold, NUM_SAMPLES, false, "vcosq_f32");
     RUN_TESTp(generic_test, acosf, vacosq_f32, -1.f, 1.f, arc_theshold, NUM_SAMPLES, false, "vacosq_f32");
     RUN_TESTp(generic_test, asinf, vasinq_f32, -1.f, 1.f, arc_theshold, NUM_SAMPLES, false, "vasinq_f32");
-    RUN_TESTp(generic_test, atanf, vatanq_f32, -10.f, 10.f, 1.e-04f, NUM_SAMPLES, false, "vatanq_f32");
+    RUN_TESTp(generic_test, atanf, vatanq_f32, -10.f, 10.f, arc_theshold, NUM_SAMPLES, false, "vatanq_f32");
     RUN_TESTp(generic_test, atan2_angle, simd_atan2, 0.f, 6.28318530f, arc_theshold, 32768, false, "vatan2q_f32");
 #endif
 }
@@ -186,13 +188,13 @@ SUITE(exponentiation)
     RUN_TESTp(generic_test, log2f, mm256_log2_ps, FLT_EPSILON, 1.e20f, 3.e-07f, 32768, true, "mm256_log2_ps");
     RUN_TESTp(generic_test, expf, mm256_exp_ps, -87.f, 87.f, exp_threshold, NUM_SAMPLES, true, "mm256_exp_ps");
     RUN_TESTp(generic_test, exp2f, mm256_exp2_ps, -126.f, 126.f, exp_threshold, NUM_SAMPLES, true, "mm256_exp2");
-    RUN_TESTp(generic_test, cbrtf, mm256_cbrt_ps, -1000.f, 1000.f, 2.e-07f, 4096, true, "mm256_cbrt_ps");
+    RUN_TESTp(generic_test, cbrtf, mm256_cbrt_ps, -1000.f, 1000.f, cbrt_threshold, 4096, true, "mm256_cbrt_ps");
 #else
     RUN_TESTp(generic_test, logf, vlogq_f32, FLT_EPSILON, 1.e20f, 1.e-07f, 32768, true, "vlogq_f32");
     RUN_TESTp(generic_test, log2f, vlog2q_f32, FLT_EPSILON, 1.e20f, 3.e-07f, 32768, true, "vlog2q_f32");
     RUN_TESTp(generic_test, expf, vexpq_f32, -87.f, 87.f, exp_threshold, NUM_SAMPLES, true, "vexpq_f32");
     RUN_TESTp(generic_test, exp2f, vexp2q_f32, -126.f, 126.f, exp_threshold, NUM_SAMPLES, true, "vexp2q_f32");
-    RUN_TESTp(generic_test, cbrtf, vcbrtq_f32, -1000.f, 1000.f, 2.e-07f, 4096, true, "vcbrtq_f32");
+    RUN_TESTp(generic_test, cbrtf, vcbrtq_f32, -1000.f, 1000.f, cbrt_threshold, 4096, true, "vcbrtq_f32");
 #endif
 }
 

@@ -457,10 +457,10 @@ static inline simd_vector simd_sign(simd_vector a)
     simd_vector equal_to_zero = simd_cmp_eq(x, simd_splat_zero());
     simd_vector one = simd_splat(1.f);
 
-#ifdef __MATH_INTRINSINCS_FAST__
     // clamp values
     x = simd_clamp(x, simd_splat(-127.f), simd_splat(127.f));
 
+#ifdef __MATH_INTRINSINCS_FAST__
     simd_vector ipart = simd_floor(x);
     simd_vector fpart = simd_sub(x, ipart);
 
@@ -471,9 +471,6 @@ static inline simd_vector simd_sign(simd_vector a)
     simd_vector expfpart = simd_polynomial6(fpart, (float[]) {1.8775767e-3f, 8.9893397e-3f, 5.5826318e-2f, 2.4015361e-1f, 6.9315308e-1f, 1.f});
     simd_vector result = simd_mul(expipart, expfpart);
 #else
-    // clamp values
-    x = simd_clamp(x, simd_splat(-127.f), simd_splat(127.f));
-
     simd_vector i0 = simd_floor(x);
     x = simd_sub(x, i0);
 
@@ -491,7 +488,6 @@ static inline simd_vector simd_sign(simd_vector a)
     result = simd_or(result, invalid_mask);
     result = simd_select(result, simd_splat_positive_infinity(), input_is_infinity); // +inf arg will be +inf
     return result;
-
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -708,29 +704,35 @@ __m256 mm256_cos_ps(__m256 x)
 #else
     __m256 mm256_atan_ps(__m256 xx)
 #endif
-{	
-	simd_vector sign = simd_sign(xx);
-	simd_vector x = simd_abs(xx);
-	simd_vector one = simd_splat(1.f);
+{
+    simd_vector sign = simd_sign(xx);
+    simd_vector x = simd_abs(xx);
+    simd_vector one = simd_splat(1.f);
 
-	// range reduction
-	simd_vector above_3pi8 = simd_cmp_gt(x, simd_splat(2.414213562373095f));
-	simd_vector above_pi8 = simd_andnot(simd_cmp_gt(x, simd_splat(0.4142135623730950f)), above_3pi8);
-	simd_vector y = simd_splat_zero();
-	x = simd_select(x, simd_neg(simd_rcp(x)), above_3pi8);
-	x = simd_select(x, simd_div(simd_sub(x, one), simd_add(x, one)), above_pi8);
-	y = simd_select(y, simd_splat(SIMD_MATH_PI2), above_3pi8);
-	y = simd_select(y, simd_splat(SIMD_MATH_PI4), above_pi8);
-	
-	// minimax polynomial
-	simd_vector z = simd_mul(x, x);
-	simd_vector tmp = simd_polynomial4(z, (float[]) {8.05374449538e-2f, -1.38776856032E-1f, 1.99777106478E-1f, -3.33329491539E-1f});
+    // range reduction
+    simd_vector above_3pi8 = simd_cmp_gt(x, simd_splat(2.414213562373095f));
+    simd_vector above_pi8 = simd_andnot(simd_cmp_gt(x, simd_splat(0.4142135623730950f)), above_3pi8);
+    simd_vector y = simd_splat_zero();
+
+#ifdef __MATH_INTRINSINCS_FAST__
+    x = simd_select(x, simd_neg(simd_rcp(x)), above_3pi8);
+    x = simd_select(x, simd_mul(simd_sub(x, one), simd_rcp(simd_add(x, one))), above_pi8);
+#else
+    x = simd_select(x, simd_neg(simd_div(one, x)), above_3pi8);
+    x = simd_select(x, simd_div(simd_sub(x, one), simd_add(x, one)), above_pi8);
+#endif
+    y = simd_select(y, simd_splat(SIMD_MATH_PI2), above_3pi8);
+    y = simd_select(y, simd_splat(SIMD_MATH_PI4), above_pi8);
+
+    // minimax polynomial
+    simd_vector z = simd_mul(x, x);
+    simd_vector tmp = simd_polynomial4(z, (float[]) {8.05374449538e-2f, -1.38776856032E-1f, 1.99777106478E-1f, -3.33329491539E-1f});
     tmp = simd_mul(tmp, z);
-	tmp = simd_fmad(tmp, x, x);
-	y = simd_add(tmp, y);
-	y = simd_mul(y, sign);
-	
-	return y;	
+    tmp = simd_fmad(tmp, x, x);
+    y = simd_add(tmp, y);
+    y = simd_mul(y, sign);
+
+    return y;	
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -793,7 +795,11 @@ __m256 mm256_cos_ps(__m256 x)
     simd_vector rem_equals_1 = simd_cmp_eq(rem, simd_splat(1.f));
     simd_vector rem_equals_2 = simd_cmp_eq(rem, simd_splat(2.f));
     simd_vector x1 = simd_mul(x, simd_select(cbrt4, cbrt2, rem_equals_1));
+#ifdef __MATH_INTRINSINCS_FAST__
+    simd_vector x2 = simd_mul(x, simd_rcp(simd_select(cbrt4, cbrt2, rem_equals_1)));
+#else
     simd_vector x2 = simd_div(x, simd_select(cbrt4, cbrt2, rem_equals_1));
+#endif
 	x = simd_select(x, simd_select(x1, x2, exponent_is_negative), simd_or(rem_equals_1, rem_equals_2));
     exponent = simd_mul(exponent, simd_select(simd_splat(1.f), simd_splat(-1.f), exponent_is_negative));
 
@@ -801,7 +807,11 @@ __m256 mm256_cos_ps(__m256 x)
     x = simd_ldexp(x, exponent);
 
     // Newton iteration, x -= ( x - (z/(x*x)) ) * 0.333333333333;
+#ifdef __MATH_INTRINSINCS_FAST__
+    x = simd_sub(x, simd_mul(simd_sub(x, simd_mul(z, simd_rcp(simd_mul(x, x)))), one_over_three));
+#else
     x = simd_sub(x, simd_mul(simd_sub(x, simd_div(z, simd_mul(x, x))), one_over_three));
+#endif
     x = simd_mul(x, sign);  // if input is zero, sign is also zero
 
     return x;
