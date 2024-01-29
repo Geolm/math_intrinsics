@@ -76,5 +76,7 @@ int main(int argc, char * argv[])
 
 #endif
 
-    return (output!=0);
+    printf("\n%d\n", output);
+
+    return 0;
 }
