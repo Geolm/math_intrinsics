@@ -294,7 +294,11 @@ static inline simd_vector simd_polynomial6(simd_vector x, float* coefficients)
     return result;
 }
 
-static inline simd_vector simd_clamp(simd_vector a, simd_vector range_min, simd_vector range_max) {return simd_max(simd_min(a, range_max), range_min);}
+//----------------------------------------------------------------------------------------------------------------------
+static inline simd_vector simd_clamp(simd_vector a, simd_vector range_min, simd_vector range_max) 
+{
+    return simd_max(simd_min(a, range_max), range_min);
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 static inline simd_vector simd_sign(simd_vector a)

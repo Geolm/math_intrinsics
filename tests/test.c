@@ -347,6 +347,12 @@ int main(int argc, char * argv[])
 {
     GREATEST_MAIN_BEGIN();
 
+#ifdef __MATH_INTRINSINCS_FAST__
+    printf("math intrinsics unit tests : mode fast\n\n");
+#else
+    printf("math intrinsics unit tests : mode precision\n\n");
+#endif
+
     RUN_SUITE(trigonometry);
     RUN_SUITE(exponentiation);
     RUN_SUITE(infinity_nan_compliance);
