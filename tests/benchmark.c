@@ -2,10 +2,12 @@
 #include "sokol_time.h"
 #include <stdio.h>
 #include <float.h>
+#include <math.h>
 
 
 #include "../math_intrinsics.h"
 
+typedef float (*reference_function)(float);
 #ifdef __MATH__INTRINSICS__AVX__
     typedef __m256 (*approximation_function)(__m256);
     #define simd_vector_width (8)
@@ -14,9 +16,9 @@
     #define simd_vector_width (4)
 #endif
 
-#define NUM_ITERATIONS (1000000000 / simd_vector_width)
+#define NUM_ITERATIONS (1000000000)
 
-int benchmark(approximation_function function, const char* name)
+int benchmark(approximation_function function, reference_function reference, const char* name)
 {
     float init_array[simd_vector_width];
     uint64_t start = 0;
@@ -32,7 +34,7 @@ int benchmark(approximation_function function, const char* name)
 
      start = stm_now();
 
-    for(uint32_t i=0; i<NUM_ITERATIONS; ++i)
+    for(uint32_t i=0; i<(NUM_ITERATIONS / simd_vector_width); ++i)
     {
         result = _mm256_add_ps(result, function(input));
         input = _mm256_add_ps(input, step);
@@ -46,7 +48,7 @@ int benchmark(approximation_function function, const char* name)
 
      start = stm_now();
 
-    for(uint32_t i=0; i<NUM_ITERATIONS; ++i)
+    for(uint32_t i=0; i<(NUM_ITERATIONS / simd_vector_width); ++i)
     {
         result = vaddq_f32(result, function(input));
         input = vaddq_f32(input, step);
@@ -55,7 +57,22 @@ int benchmark(approximation_function function, const char* name)
     output = vgetq_lane_f32(result, 0);
 #endif
 
-    printf(".%s: %3.3f ms \n", name, stm_ms(stm_since(start)));
+    float simd_time = stm_ms(stm_since(start));
+
+    printf(".%s: %3.3f ms", name, simd_time);
+
+    float total = simd_time;
+
+    start = stm_now();
+
+    for(uint32_t i=0; i<NUM_ITERATIONS; ++i)
+        total += reference(total);
+
+    output += total;
+
+    float clib_time = stm_ms(stm_since(start));
+    
+    printf("\t c std func: %3.3f ms\tratio: %2.2fx\n", clib_time, clib_time/simd_time);
 
     return output;
 }
@@ -74,27 +91,27 @@ int main(int argc, char * argv[])
     int output = 0;
     
 #ifdef __MATH__INTRINSICS__AVX__
-    output += benchmark(mm256_acos_ps, "mm256_acos_ps");
-    output += benchmark(mm256_asin_ps, "mm256_asin_ps");
-    output += benchmark(mm256_atan_ps, "mm256_atan_ps");
-    output += benchmark(mm256_cbrt_ps, "mm256_cbrt_ps");
-    output += benchmark(mm256_cos_ps, "mm256_cos_ps");
-    output += benchmark(mm256_sin_ps, "mm256_sin_ps");
-    output += benchmark(mm256_exp_ps, "mm256_exp_ps");
-    output += benchmark(mm256_exp2_ps, "mm256_exp2_ps");
-    output += benchmark(mm256_log_ps, "mm256_log_ps");
-    output += benchmark(mm256_log2_ps, "mm256_log2_ps");
+    output += benchmark(mm256_acos_ps, acosf, "mm256_acos_ps");
+    output += benchmark(mm256_asin_ps, asinf, "mm256_asin_ps");
+    output += benchmark(mm256_atan_ps, atanf, "mm256_atan_ps");
+    output += benchmark(mm256_cbrt_ps, cbrtf, "mm256_cbrt_ps");
+    output += benchmark(mm256_cos_ps, cosf, "mm256_cos_ps");
+    output += benchmark(mm256_sin_ps, sinf, "mm256_sin_ps");
+    output += benchmark(mm256_exp_ps, expf, "mm256_exp_ps");
+    output += benchmark(mm256_exp2_ps, exp2f, "mm256_exp2_ps");
+    output += benchmark(mm256_log_ps, logf, "mm256_log_ps");
+    output += benchmark(mm256_log2_ps, log2f, "mm256_log2_ps");
 #else
-    output += benchmark(vacosq_f32, "vacosq_f32");
-    output += benchmark(vasinq_f32, "vasinq_f32");
-    output += benchmark(vatanq_f32, "vatanq_f32");
-    output += benchmark(vcbrtq_f32, "vcbrtq_f32");
-    output += benchmark(vcosq_f32, "vcosq_f32");
-    output += benchmark(vsinq_f32, "vsinq_f32");
-    output += benchmark(vexpq_f32, "vexpq_f32");
-    output += benchmark(vexp2q_f32, "vexp2q_f32");
-    output += benchmark(vlogq_f32, "vlogq_f32");
-    output += benchmark(vlog2q_f32, "vlog2q_f32");
+    output += benchmark(vacosq_f32, acosf, "vacosq_f32");
+    output += benchmark(vasinq_f32, asinf, "vasinq_f32");
+    output += benchmark(vatanq_f32, atanf, "vatanq_f32");
+    output += benchmark(vcbrtq_f32, cbrtf, "vcbrtq_f32");
+    output += benchmark(vcosq_f32, cosf, "vcosq_f32");
+    output += benchmark(vsinq_f32, sinf, "vsinq_f32");
+    output += benchmark(vexpq_f32, expf, "vexpq_f32");
+    output += benchmark(vexp2q_f32, exp2f, "vexp2q_f32");
+    output += benchmark(vlogq_f32, logf, "vlogq_f32");
+    output += benchmark(vlog2q_f32, log2f, "vlog2q_f32");
 #endif
 
     printf("\n%d\n", output);
