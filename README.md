@@ -149,6 +149,8 @@ benchmark : mode precision
 .mm256_log2_ps: 479.116 ms	 c std func: 3594.876 ms	  ratio: 7.50x
 ```
 
+Don't forget : the function mm256_sincos_ps computes sinus and cosinus for the cost of one.
+
 ## why AVX2 ?
 
 On multiple functions this library use a float as an int to have access to the mantissa and the exponent part. While it's doable with AVX1 using SSE4.2, I don't see the point of not using AVX2 which have been on intel CPU since 2013.
