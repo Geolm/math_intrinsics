@@ -132,36 +132,22 @@ If you use the macro \_\_MATH_INTRINSINCS_FAST\_\_ some functions will have less
 ## is it fast?
 The goal of this library is to provide math function with a good precision with every computation done in AVX/NEON. Performance is not the focus.
 
-Here's the benchmark results on my old Intel Core i7 from 2018 for 10 billions of operations
+Here's the benchmark results on my old Intel Core i7 from 2018 for 1 billion of operations, comparison against the C standard library.
 
-### precision mode
+```C
+benchmark : mode precision
 
-* mm256_acos_ps: 7795.786 ms
-* mm256_asin_ps: 7034.068 ms 
-* mm256_atan_ps: 7797.666 ms 
-* mm256_cbrt_ps: 15130.169 ms 
-* mm256_cos_ps: 8600.893 ms 
-* mm256_sin_ps: 8288.432 ms 
-* mm256_exp_ps: 8647.793 ms 
-* mm256_exp2_ps: 10130.995 ms 
-* mm256_log_ps: 10423.453 ms 
-* mm256_log2_ps: 5232.928 ms 
-
-### fast mode
-
-Using \_\_MATH_INTRINSINCS_FAST\_\_
-
-* mm256_acos_ps: 4823.037 ms 
-* mm256_asin_ps: 4982.991 ms 
-* mm256_atan_ps: 7213.156 ms 
-* mm256_cbrt_ps: 14716.824 ms 
-* mm256_cos_ps: 5441.888 ms 
-* mm256_sin_ps: 5186.748 ms 
-* mm256_exp_ps: 8429.838 ms 
-* mm256_exp2_ps: 5262.944 ms 
-* mm256_log_ps: 10318.204 ms 
-* mm256_log2_ps: 5130.680 ms 
-
+.mm256_acos_ps: 723.730 ms	 c std func: 5408.153 ms	  ratio: 7.47x
+.mm256_asin_ps: 692.439 ms	 c std func: 5419.091 ms	  ratio: 7.83x
+.mm256_atan_ps: 733.843 ms	 c std func: 3762.987 ms	  ratio: 5.13x
+.mm256_cbrt_ps: 1522.731 ms	 c std func: 19559.201 ms	  ratio: 12.84x
+.mm256_cos_ps: 882.112 ms	   c std func: 15540.117 ms	  ratio: 17.62x
+.mm256_sin_ps: 838.590 ms	   c std func: 15214.896 ms	  ratio: 18.14x
+.mm256_exp_ps: 830.130 ms	   c std func: 4399.218 ms	  ratio: 5.30x
+.mm256_exp2_ps: 1007.015 ms	 c std func: 2076.871 ms	  ratio: 2.06x
+.mm256_log_ps: 1019.277 ms	 c std func: 16832.281 ms	  ratio: 16.51x
+.mm256_log2_ps: 479.116 ms	 c std func: 3594.876 ms	  ratio: 7.50x
+```
 
 ## why AVX2 ?
 
