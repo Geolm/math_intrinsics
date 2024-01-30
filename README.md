@@ -132,12 +132,36 @@ If you use the macro \_\_MATH_INTRINSINCS_FAST\_\_ some functions will have less
 ## is it fast?
 The goal of this library is to provide math function with a good precision with every computation done in AVX/NEON. Performance is not the focus.
 
-Here's the benchmark results on my old Intel Core i7 from 2018 (time for 32 billions of computed values)
-* mm256_sin_ps : 29887ms
-* mm256_acos_ps : 24650ms
-* mm256_exp_ps : 24387ms
+Here's the benchmark results on my old Intel Core i7 from 2018 for 10 billions of operations
 
-Use \_\_MATH_INTRINSINCS_FAST\_\_ if needed.
+### precision mode
+
+* mm256_acos_ps: 7795.786 ms
+* mm256_asin_ps: 7034.068 ms 
+* mm256_atan_ps: 7797.666 ms 
+* mm256_cbrt_ps: 15130.169 ms 
+* mm256_cos_ps: 8600.893 ms 
+* mm256_sin_ps: 8288.432 ms 
+* mm256_exp_ps: 8647.793 ms 
+* mm256_exp2_ps: 10130.995 ms 
+* mm256_log_ps: 10423.453 ms 
+* mm256_log2_ps: 5232.928 ms 
+
+### fast mode
+
+Using \_\_MATH_INTRINSINCS_FAST\_\_
+
+* mm256_acos_ps: 4823.037 ms 
+* mm256_asin_ps: 4982.991 ms 
+* mm256_atan_ps: 7213.156 ms 
+* mm256_cbrt_ps: 14716.824 ms 
+* mm256_cos_ps: 5441.888 ms 
+* mm256_sin_ps: 5186.748 ms 
+* mm256_exp_ps: 8429.838 ms 
+* mm256_exp2_ps: 5262.944 ms 
+* mm256_log_ps: 10318.204 ms 
+* mm256_log2_ps: 5130.680 ms 
+
 
 ## why AVX2 ?
 
