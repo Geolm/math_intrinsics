@@ -141,9 +141,9 @@ benchmark : mode precision
 .mm256_asin_ps: 692.439 ms	 c std func: 5419.091 ms	  ratio: 7.83x
 .mm256_atan_ps: 733.843 ms	 c std func: 3762.987 ms	  ratio: 5.13x
 .mm256_cbrt_ps: 1522.731 ms	 c std func: 19559.201 ms	  ratio: 12.84x
-.mm256_cos_ps: 882.112 ms	   c std func: 15540.117 ms	  ratio: 17.62x
-.mm256_sin_ps: 838.590 ms	   c std func: 15214.896 ms	  ratio: 18.14x
-.mm256_exp_ps: 830.130 ms	   c std func: 4399.218 ms	  ratio: 5.30x
+.mm256_cos_ps: 882.112 ms        c std func: 15540.117 ms	  ratio: 17.62x
+.mm256_sin_ps: 838.590 ms	 c std func: 15214.896 ms	  ratio: 18.14x
+.mm256_exp_ps: 830.130 ms	 c std func: 4399.218 ms	  ratio: 5.30x
 .mm256_exp2_ps: 1007.015 ms	 c std func: 2076.871 ms	  ratio: 2.06x
 .mm256_log_ps: 1019.277 ms	 c std func: 16832.281 ms	  ratio: 16.51x
 .mm256_log2_ps: 479.116 ms	 c std func: 3594.876 ms	  ratio: 7.50x
