@@ -16,7 +16,7 @@ typedef float (*reference_function)(float);
     #define simd_vector_width (4)
 #endif
 
-#define NUM_ITERATIONS (1000000000)
+#define NUM_ITERATIONS (200000000)
 
 int benchmark(approximation_function function, reference_function reference, const char* name)
 {
@@ -59,7 +59,7 @@ int benchmark(approximation_function function, reference_function reference, con
 
     float simd_time = stm_ms(stm_since(start));
 
-    printf(".%s: %3.3f ms", name, simd_time);
+    printf(".%s:\t %5.2fms", name, simd_time);
 
     float total = simd_time;
 
@@ -72,7 +72,7 @@ int benchmark(approximation_function function, reference_function reference, con
 
     float clib_time = stm_ms(stm_since(start));
     
-    printf("\t c std func: %3.3f ms\tratio: %2.2fx\n", clib_time, clib_time/simd_time);
+    printf("\tc std func: %5.2fms\tratio: %2.2fx\n", clib_time, clib_time/simd_time);
 
     return output;
 }
@@ -83,9 +83,9 @@ int main(int argc, char * argv[])
     stm_setup();
 
 #ifdef __MATH_INTRINSINCS_FAST__
-    printf("benchmark : mode fast\n\n");
+    printf("benchmark, mode fast, %d iterations\n\n", NUM_ITERATIONS);
 #else
-    printf("benchmark : mode precision\n\n");
+    printf("benchmark, mode precision, %d iterations\n\n", NUM_ITERATIONS);
 #endif
 
     int output = 0;
