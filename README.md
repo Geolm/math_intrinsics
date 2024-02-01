@@ -107,17 +107,15 @@ float32x4_t vcbrtq_f32(float32x4_t a);
 
 # fast functions 
 
-If you use the macro \_\_MATH_INTRINSINCS_FAST\_\_ some functions will have less precision but better performances:
+If you use the macro \_\_MATH_INTRINSINCS_FAST\_\_ some functions will have a bit less precision but better performances:
 
-* sin, max_error : 2.682209015e-07
-* cos, max_error : 5.811452866e-07
-* acos, max_error : 6.520748138e-05
-* asin, max_error : 6.520736497e-05
-* atan, max_error : 7.289648056e-05
-* atan2, max_error : 8.535385132e-05
-* exp2, max_error : 2.317290893e-07
-* cbrt, max_error : 9.659048374e-05
+* sin, max_error : 2.682209015e-07 perf : ~1.5x
+* cos, max_error : 5.811452866e-07 perf : ~1.5x
+* acos, max_error : 6.520748138e-05 perf : ~1.6x
+* asin, max_error : 6.520736497e-05 perf : ~1.4x
+* exp2, max_error : 2.317290893e-07 perf : ~1.9x
 
+Check the benchmark actions in build system for more details. As you can see, we maintained good precision with a noticeable performance boost. Most non-scientific program could use the fast version.
 
 # references
 

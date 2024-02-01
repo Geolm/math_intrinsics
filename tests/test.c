@@ -62,7 +62,7 @@ TEST generic_test(reference_function ref, approximation_function approx, float r
     v_max_error = _mm256_max_ps(v_max_error, _mm256_permute_ps(v_max_error, _MM_SHUFFLE(1, 0, 3, 2)));
     v_max_error = _mm256_max_ps(v_max_error, _mm256_permute2f128_ps(v_max_error, v_max_error, 1));
 
-    printf("%s max error : %.*e\n", name, FLT_DECIMAL_DIG, _mm256_cvtss_f32(v_max_error));
+    printf("%s\t max error : %.*e\n", name, FLT_DECIMAL_DIG, _mm256_cvtss_f32(v_max_error));
 #else
     float32x4_t v_epsilon = vdupq_n_f32(epsilon);
     float32x4_t v_max_error = vdupq_n_f32(0.f);
@@ -81,7 +81,7 @@ TEST generic_test(reference_function ref, approximation_function approx, float r
         v_max_error = vmaxq_f32(v_max_error, v_error);
     }
 
-    printf("%s max error : %.*e\n", name, FLT_DECIMAL_DIG, vmaxvq_f32(v_max_error));
+    printf("%s\t max error : %.*e\n", name, FLT_DECIMAL_DIG, vmaxvq_f32(v_max_error));
 #endif
 
     free(input);
