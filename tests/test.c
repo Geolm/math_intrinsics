@@ -208,7 +208,7 @@ static const float pow_threshold = 1.e-05f;
 static const float trigo_threshold = FLT_EPSILON;
 static const float exp_threshold = 2.e-07f;
 static const float arc_threshold = 1.e-06f;
-static const float pow_threshold = 2.e-07f;
+static const float pow_threshold = 1.e-06f;
 #endif
 
 float atan2_xy(float x, float y) {return atan2f(y, x);}
