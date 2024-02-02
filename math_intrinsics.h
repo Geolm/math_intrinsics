@@ -164,6 +164,7 @@ extern "C" {
     static inline simd_vector simd_cast_from_int(simd_vectori a) {return vreinterpretq_f32_s32(a);}
     static inline simd_vectori simd_add_i(simd_vectori a, simd_vectori b) {return vaddq_s32(a, b);}
     static inline simd_vectori simd_sub_i(simd_vectori a, simd_vectori b) {return vsubq_s32(a, b);}
+    static inline simd_vector simd_mul_i(simd_vector a, simd_vector b) {return vmulq_s32(a, b);}
     static inline simd_vectori simd_splat_i(int i) {return vdupq_n_s32(i);}
     static inline simd_vectori simd_splat_zero_i(void) {return vdupq_n_s32(0);}
     static inline simd_vectori simd_shift_left_i(simd_vectori a, int i) {return vshlq_s32(a, vdupq_n_s32(i));}
@@ -175,6 +176,7 @@ extern "C" {
     static inline simd_vectori simd_cmp_gt_i(simd_vectori a, simd_vectori b) {return vcgtq_s32(a, b);}
     static inline simd_vectori simd_min_i(simd_vectori a, simd_vectori b) {return vminq_s32(a, b);}
     static inline simd_vectori simd_max_i(simd_vectori a, simd_vectori b) {return vmaxq_s32(a, b);}
+    static inline simd_vectori simd_abs_i(simd_vectori a) {return vabsq_s32(a);}
     static inline simd_vector simd_gather(const float* array, simd_vectori indices)
     {
         float tmp[4] = {array[indices[0]], array[indices[1]], array[indices[2]], array[indices[3]]};
@@ -245,12 +247,14 @@ extern "C" {
     static inline simd_vector simd_cast_from_int(simd_vectori a) {return _mm256_castsi256_ps(a);}
     static inline simd_vectori simd_add_i(simd_vectori a, simd_vectori b) {return _mm256_add_epi32(a, b);}
     static inline simd_vectori simd_sub_i(simd_vectori a, simd_vectori b) {return _mm256_sub_epi32(a, b);}
+    static inline simd_vectori simd_mul_i(simd_vectori a, simd_vectori b) {return _mm256_mullo_epi32(a, b);}
     static inline simd_vectori simd_splat_i(int i) {return _mm256_set1_epi32(i);}
     static inline simd_vectori simd_splat_zero_i(void) {return _mm256_setzero_si256();}
     static inline simd_vectori simd_shift_left_i(simd_vectori a, int i) {return _mm256_slli_epi32(a, i);}
     static inline simd_vectori simd_shift_right_i(simd_vectori a, int i) {return _mm256_srai_epi32(a, i);}
     static inline simd_vectori simd_and_i(simd_vectori a, simd_vectori b) {return _mm256_and_si256(a, b);}
     static inline simd_vectori simd_or_i(simd_vectori a, simd_vectori b) {return _mm256_or_si256(a, b);}
+    static inline simd_vectori simd_abs_i(simd_vectori a) {return _mm256_abs_epi32(a);}
     static inline simd_vectori simd_andnot_i(simd_vectori a, simd_vectori b) {return _mm256_andnot_si256(b, a);}
     static inline simd_vectori simd_cmp_eq_i(simd_vectori a, simd_vectori b) {return _mm256_cmpeq_epi32(a, b);}
     static inline simd_vectori simd_cmp_gt_i(simd_vectori a, simd_vectori b) {return _mm256_cmpgt_epi32(a, b);}
@@ -271,24 +275,23 @@ extern "C" {
 #endif
 
 //----------------------------------------------------------------------------------------------------------------------
-static inline simd_vector simd_frexp(simd_vector x, simd_vector* exponent)
+static inline simd_vector simd_frexp(simd_vector x, simd_vectori* exponent)
 {
     simd_vectori cast_float = simd_cast_from_float(x);
     simd_vectori e = simd_and_i(simd_shift_right_i(cast_float, 23), simd_splat_i(0xff));;
     simd_vectori equal_to_zero = simd_and_i(simd_cmp_eq_i(e, simd_splat_zero_i()), simd_cast_from_float(simd_cmp_eq(x, simd_splat_zero())));
-    e = simd_andnot_i(simd_sub_i(e, simd_splat_i(0x7e)), equal_to_zero);
+    *exponent = simd_andnot_i(simd_sub_i(e, simd_splat_i(0x7e)), equal_to_zero);
     cast_float = simd_and_i(cast_float, simd_splat_i(0x807fffff));
     cast_float = simd_or_i(cast_float, simd_splat_i(0x3f000000));
-    *exponent = simd_convert_from_int(e);
     return simd_select(simd_cast_from_int(cast_float), x, simd_cast_from_int(equal_to_zero));
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-static inline simd_vector simd_ldexp(simd_vector x, simd_vector pw2)
+static inline simd_vector simd_ldexp(simd_vector x, simd_vectori pw2)
 {
     simd_vectori fl = simd_cast_from_float(x);
     simd_vectori e = simd_and_i(simd_shift_right_i(fl, 23), simd_splat_i(0xff));
-    e = simd_and_i(simd_add_i(e, simd_convert_from_float(pw2)), simd_splat_i(0xff));
+    e = simd_and_i(simd_add_i(e, pw2), simd_splat_i(0xff));
     simd_vectori is_infinity = simd_cmp_eq_i(e, simd_splat_i(0xff));
     fl = simd_or_i(simd_andnot_i(fl, is_infinity), simd_and_i(fl, simd_splat_i(0xFF800000)));
     fl = simd_or_i(simd_shift_left_i(e, 23), simd_and_i(fl, simd_splat_i(0x807fffff)));
@@ -506,15 +509,16 @@ static inline simd_vectori simd_neg_i(simd_vectori a){return simd_sub_i(simd_spl
     simd_vector expfpart = simd_polynomial6(fpart, (float[]) {1.8775767e-3f, 8.9893397e-3f, 5.5826318e-2f, 2.4015361e-1f, 6.9315308e-1f, 1.f});
     simd_vector result = simd_mul(expipart, expfpart);
 #else
-    simd_vector i0 = simd_floor(x);
-    x = simd_sub(x, i0);
+    simd_vector px = simd_floor(x);
+    simd_vectori i0 = simd_convert_from_float(px);
+    x = simd_sub(x, px);
 
     simd_vector above_half = simd_cmp_gt(x, simd_splat(.5f));
-    i0 = simd_select(i0, simd_add(i0, one), above_half);
+    i0 = simd_select_i(i0, simd_add_i(i0, simd_splat_i(1)), simd_cast_from_float(above_half));
     x = simd_select(x, simd_sub(x, one), above_half);
 
-    simd_vector px = simd_polynomial6(x, (float[]) {1.535336188319500E-004f, 1.339887440266574E-003f, 9.618437357674640E-003f,
-                                                    5.550332471162809E-002f, 2.402264791363012E-001f, 6.931472028550421E-001f});
+    px = simd_polynomial6(x, (float[]) {1.535336188319500E-004f, 1.339887440266574E-003f, 9.618437357674640E-003f,
+                                        5.550332471162809E-002f, 2.402264791363012E-001f, 6.931472028550421E-001f});
     px = simd_fmad(px, x,  one);
     simd_vector result = simd_ldexp(px, i0);
 #endif
@@ -805,29 +809,29 @@ __m256 mm256_cos_ps(__m256 x)
     simd_vector z = x;
 
     // extract power of 2, leaving mantissa between 0.5 and 1
-    simd_vector exponent;
+    simd_vectori exponent;
     x = simd_frexp(x, &exponent);
 
     // Approximate cube root of number between .5 and 1
     x = simd_polynomial5(x, (float[]) {-0.1346611047335f, 0.5466460136639f, -0.954382247715f, 1.13999833547f, 0.40238979564f});
 
     // exponent divided by 3
-    simd_vector exponent_is_negative = simd_cmp_lt(exponent, simd_splat_zero());
+    simd_vectori exponent_is_negative = simd_cmp_gt_i(simd_splat_zero_i(), exponent);
     
-    exponent = simd_abs(exponent);
-    simd_vector rem = exponent;
-    exponent = simd_floor(simd_mul(exponent, one_over_three));
-    rem = simd_sub(rem, simd_mul(exponent, simd_splat(3.f)));
+    exponent = simd_abs_i(exponent);
+    simd_vectori rem = exponent;
+    exponent = simd_convert_from_float((simd_mul(simd_convert_from_int(exponent), one_over_three)));
+    rem = simd_sub_i(rem, simd_mul_i(exponent, simd_splat_i(3)));
 
     simd_vector cbrt2 = simd_splat(1.25992104989487316477f);
     simd_vector cbrt4 = simd_splat(1.58740105196819947475f);
 
-    simd_vector rem_equals_1 = simd_cmp_eq(rem, simd_splat(1.f));
-    simd_vector rem_equals_2 = simd_cmp_eq(rem, simd_splat(2.f));
+    simd_vector rem_equals_1 = simd_cast_from_int(simd_cmp_eq_i(rem, simd_splat_i(1)));
+    simd_vector rem_equals_2 = simd_cast_from_int(simd_cmp_eq_i(rem, simd_splat_i(2)));
     simd_vector x1 = simd_mul(x, simd_select(cbrt4, cbrt2, rem_equals_1));
     simd_vector x2 = simd_div(x, simd_select(cbrt4, cbrt2, rem_equals_1));
-	x = simd_select(x, simd_select(x1, x2, exponent_is_negative), simd_or(rem_equals_1, rem_equals_2));
-    exponent = simd_mul(exponent, simd_select(simd_splat(1.f), simd_splat(-1.f), exponent_is_negative));
+    x = simd_select(x, simd_select(x1, x2, simd_cast_from_int(exponent_is_negative)), simd_or(rem_equals_1, rem_equals_2));
+    exponent = simd_mul_i(exponent, simd_select_i(simd_splat_i(1), simd_splat_i(-1), exponent_is_negative));
 
     // multiply by power of 2
     x = simd_ldexp(x, exponent);

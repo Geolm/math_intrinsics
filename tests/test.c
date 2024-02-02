@@ -197,18 +197,18 @@ TEST nan_expected(float input, approximation_function function)
 
 #define NUM_SAMPLES (1024)
 
-static const float cbrt_threshold = 2.e-07f;
-
 #ifdef __MATH_INTRINSINCS_FAST__
 static const float trigo_threshold = 1.e-06f;
 static const float exp_threshold = 3.e-07f;
 static const float arc_threshold = 1.e-04f;
 static const float pow_threshold = 1.e-05f;
+static const float cbrt_threshold = 2.e-07f;
 #else
 static const float trigo_threshold = FLT_EPSILON;
 static const float exp_threshold = 2.e-07f;
 static const float arc_threshold = 1.e-06f;
 static const float pow_threshold = 1.e-06f;
+static const float cbrt_threshold = 2.e-07f;
 #endif
 
 float atan2_xy(float x, float y) {return atan2f(y, x);}
@@ -246,7 +246,7 @@ SUITE(exponentiation)
     RUN_TESTp(generic_test, log2f, mm256_log2_ps, FLT_EPSILON, 1.e20f, 3.e-07f, 32768, true, "mm256_log2_ps");
     RUN_TESTp(generic_test, expf, mm256_exp_ps, -87.f, 87.f, exp_threshold, NUM_SAMPLES, true, "mm256_exp_ps");
     RUN_TESTp(generic_test, exp2f, mm256_exp2_ps, -126.f, 126.f, exp_threshold, NUM_SAMPLES, true, "mm256_exp2");
-    RUN_TESTp(generic_test, cbrtf, mm256_cbrt_ps, -1000.f, 1000.f, cbrt_threshold, 4096, true, "mm256_cbrt_ps");
+    RUN_TESTp(generic_test, cbrtf, mm256_cbrt_ps, -1000.f, 1000.f, cbrt_threshold, 32768, true, "mm256_cbrt_ps");
     RUN_TESTp(generic_test2, powf, mm256_pow_ps, 0.f, 100000.f, pow_threshold, 32768, true, "mm256_pow_ps");
 #else
     RUN_TESTp(generic_test, logf, vlogq_f32, FLT_EPSILON, 1.e20f, 1.e-07f, 32768, true, "vlogq_f32");
