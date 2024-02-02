@@ -63,6 +63,9 @@ __m256 mm256_exp2_ps(__m256 x);
 
 // max error : 1.184910232e-07
 __m256 mm256_cbrt_ps(__m256 a);
+
+// max error : 9.768706377e-07
+__m256 mm256_pow_ps(__m256 x, __m256 y);
 ```
 
 Note : the same functions are defined in NEON intrinsics style :
@@ -103,6 +106,10 @@ float32x4_t vexp2q_f32(float32x4_t a);
 
 // max error : 1.184910232e-07
 float32x4_t vcbrtq_f32(float32x4_t a);
+
+// max error : 9.768706377e-07
+float32x4_t vpowq_f32(float32x4_t x, float32x4_t y);
+
 ```
 
 # fast functions 
@@ -114,6 +121,7 @@ If you use the macro \_\_MATH_INTRINSINCS_FAST\_\_ some functions will have a bi
 * acos, max_error : 6.520748138e-05 perf : ~1.6x
 * asin, max_error : 6.520736497e-05 perf : ~1.4x
 * exp2, max_error : 2.317290893e-07 perf : ~1.9x
+* pow, max error : 6.680314527e-06 perf : ~1.9x
 
 Check the benchmark actions in build system for more details. As you can see, we maintained good precision with a noticeable performance boost. Most non-scientific program could use the fast version.
 
@@ -155,7 +163,7 @@ On multiple functions this library use a float as an int to have access to the m
 
 ## does it handle all float cases (+inf, -inf, NAN) as the C math lib?
 
-Yes, all functions (even the fast ones) are compliant to +inf, -inf, NAN and other special cases (for example log(-4) == NAN). All based on the doc found here https://en.cppreference.com/w/
+Yes, all functions (except atan2 and pow) are compliant to +inf, -inf, NAN and other special cases (for example log(-4) == NAN). All based on the doc found here https://en.cppreference.com/w/
 
 ## what's tested?
 

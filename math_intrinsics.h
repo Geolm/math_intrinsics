@@ -52,7 +52,7 @@ extern "C" {
     // max error : 4.768371582e-07
     float32x4_t vcbrtq_f32(float32x4_t a);
 
-    // max error : 1.484901873e-07
+    // max error : 9.768706377e-07
     float32x4_t vpowq_f32(float32x4_t x, float32x4_t y);
 
     #define __MATH__INTRINSICS__NEON__
@@ -96,7 +96,7 @@ extern "C" {
     // max error : 4.768371582e-07
     __m256 mm256_cbrt_ps(__m256 a);
 
-    // max error : 1.484901873e-07
+    // max error : 9.768706377e-07
     __m256 mm256_pow_ps(__m256 x, __m256 y);
 
     #define __MATH__INTRINSICS__AVX__
