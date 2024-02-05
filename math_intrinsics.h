@@ -142,7 +142,6 @@ extern "C" {
     static inline simd_vector simd_select(simd_vector a, simd_vector b, simd_vector mask) {return vbslq_f32(vreinterpretq_u32_f32(mask), b, a);}
     static inline simd_vector simd_splat(float value) {return vdupq_n_f32(value);}
     static inline simd_vector simd_splat_zero(void) {return vdupq_n_f32(0);}
-    static inline simd_vector simd_splat_nan(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0xffffffff));}
     static inline simd_vector simd_splat_positive_infinity(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0x7f800000));}
     static inline simd_vector simd_splat_negative_infinity(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0xff800000));}
     static inline simd_vector simd_sign_mask(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0x80000000));}
@@ -150,12 +149,10 @@ extern "C" {
     static inline simd_vector simd_abs_mask(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0x7FFFFFFF));}
     static inline simd_vector simd_min_normalized(void) {return vreinterpretq_u32_f32(vdupq_n_u32(0x00800000));} // the smallest non denormalized float number
     static inline simd_vector simd_inv_mant_mask(void){return vreinterpretq_u32_f32(vdupq_n_u32(~0x7f800000));}
-    static inline simd_vector simd_mant_mask(void){return vreinterpretq_u32_f32(vdupq_n_u32(0x7f800000));}
     static inline simd_vector simd_floor(simd_vector a) {return vrndmq_f32(a);}
     static inline simd_vector simd_round(simd_vector a) {return vrndnq_f32(a);}
     static inline simd_vector simd_neg(simd_vector a) {return vnegq_f32(a);}
     static inline simd_vector simd_sqrt(simd_vector a) {return vsqrtq_f32(a);}
-    static inline simd_vector simd_rcp(simd_vector a) {simd_vector out = vrecpeq_f32(a); return vmulq_f32(out, vrecpsq_f32(out, a));}
 
     typedef int32x4_t simd_vectori;
     static inline simd_vectori simd_convert_from_float(simd_vector a) {return vcvtq_s32_f32(a);}
@@ -174,14 +171,7 @@ extern "C" {
     static inline simd_vectori simd_andnot_i(simd_vectori a, simd_vectori b) {return vbicq_s32(a, b);}
     static inline simd_vectori simd_cmp_eq_i(simd_vectori a, simd_vectori b) {return vceqq_s32(a, b);}
     static inline simd_vectori simd_cmp_gt_i(simd_vectori a, simd_vectori b) {return vcgtq_s32(a, b);}
-    static inline simd_vectori simd_min_i(simd_vectori a, simd_vectori b) {return vminq_s32(a, b);}
-    static inline simd_vectori simd_max_i(simd_vectori a, simd_vectori b) {return vmaxq_s32(a, b);}
     static inline simd_vectori simd_abs_i(simd_vectori a) {return vabsq_s32(a);}
-    static inline simd_vector simd_gather(const float* array, simd_vectori indices)
-    {
-        float tmp[4] = {array[indices[0]], array[indices[1]], array[indices[2]], array[indices[3]]};
-        return vld1q_f32(tmp);
-    }
 
     #define simd_asin vasinq_f32
     #define simd_atan vatanq_f32
@@ -218,14 +208,12 @@ extern "C" {
     static inline simd_vector simd_select(simd_vector a, simd_vector b, simd_vector mask) {return _mm256_blendv_ps(a, b, mask);}
     static inline simd_vector simd_splat(float value) {return _mm256_set1_ps(value);}
     static inline simd_vector simd_splat_zero(void) {return _mm256_setzero_ps();}
-    static inline simd_vector simd_splat_nan(void) {return _mm256_castsi256_ps(_mm256_set1_epi32(0xffffffff));}
     static inline simd_vector simd_splat_positive_infinity(void) {return _mm256_castsi256_ps(_mm256_set1_epi32(0x7f800000));}
     static inline simd_vector simd_splat_negative_infinity(void) {return _mm256_castsi256_ps(_mm256_set1_epi32(0xff800000));}
     static inline simd_vector simd_sign_mask(void) {return _mm256_castsi256_ps(_mm256_set1_epi32(0x80000000));}
     static inline simd_vector simd_inv_sign_mask(void) {return _mm256_castsi256_ps(_mm256_set1_epi32(~0x80000000));}
     static inline simd_vector simd_min_normalized(void) {return _mm256_castsi256_ps(_mm256_set1_epi32(0x00800000));} // the smallest non denormalized float number
     static inline simd_vector simd_inv_mant_mask(void){return _mm256_castsi256_ps(_mm256_set1_epi32(~0x7f800000));}
-    static inline simd_vector simd_mant_mask(void){return _mm256_castsi256_ps(_mm256_set1_epi32(0x7f800000));}
     static inline simd_vector simd_floor(simd_vector a) {return _mm256_floor_ps(a);}
     static inline simd_vector simd_round(simd_vector a) {return _mm256_round_ps(a, _MM_FROUND_NINT);}
     static inline simd_vector simd_cmp_gt(simd_vector a, simd_vector b) {return _mm256_cmp_ps(a, b, _CMP_GT_OQ);}
@@ -237,8 +225,6 @@ extern "C" {
     static inline simd_vector simd_isnan(simd_vector a) {return _mm256_cmp_ps(a, a, _CMP_NEQ_UQ);}
     static inline simd_vector simd_sqrt(simd_vector a) {return _mm256_sqrt_ps(a);}
     static inline simd_vector simd_neg(simd_vector a) {return _mm256_xor_ps(a, simd_sign_mask());}
-    static inline simd_vector simd_rcp(simd_vector a) {return _mm256_rcp_ps(a);}
-
 
     typedef __m256i simd_vectori;
     static inline simd_vectori simd_convert_from_float(simd_vector a) {return _mm256_cvttps_epi32(a);}
@@ -258,9 +244,6 @@ extern "C" {
     static inline simd_vectori simd_andnot_i(simd_vectori a, simd_vectori b) {return _mm256_andnot_si256(b, a);}
     static inline simd_vectori simd_cmp_eq_i(simd_vectori a, simd_vectori b) {return _mm256_cmpeq_epi32(a, b);}
     static inline simd_vectori simd_cmp_gt_i(simd_vectori a, simd_vectori b) {return _mm256_cmpgt_epi32(a, b);}
-    static inline simd_vectori simd_min_i(simd_vectori a, simd_vectori b) {return _mm256_min_epi32(a, b);}
-    static inline simd_vectori simd_max_i(simd_vectori a, simd_vectori b) {return _mm256_max_epi32(a, b);}
-    static inline simd_vector simd_gather(const float* array, simd_vectori indices) {return _mm256_i32gather_ps(array, indices, 4);}
 
 
     #define simd_asin mm256_asin_ps
