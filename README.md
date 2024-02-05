@@ -120,18 +120,10 @@ If you use the macro \_\_MATH_INTRINSINCS_FAST\_\_ some functions will have a bi
 * cos, max_error : 5.811452866e-07 perf : ~1.5x
 * acos, max_error : 6.520748138e-05 perf : ~1.6x
 * asin, max_error : 6.520736497e-05 perf : ~1.4x
-* exp2, max_error : 2.317290893e-07 perf : ~1.9x
-* pow, max error : 6.680314527e-06 perf : ~1.9x
+* exp2, max_error : 2.674510370e-06 perf : ~1.9x
+* pow, max error : 8.886078831e-06 perf : ~1.9x
 
-Check the benchmark actions in build system for more details. As you can see, we maintained good precision with a noticeable performance boost. Most non-scientific program could use the fast version.
-
-# references
-
-[cephes math library](https://github.com/jeremybarnes/cephes/blob/master/single/)
-
-[simple SSE sin/cos](http://gruntthepeon.free.fr/ssemath/)
-
-[speeding up atan2f by 50x](https://mazzo.li/posts/vectorized-atan2.html)
+Check the benchmark actions in build system for more details. As you can see, we maintained good precision with a noticeable performance boost. Most  programs could use the fast version.
 
 # FAQ
 
@@ -155,11 +147,11 @@ benchmark : mode precision
 .mm256_log2_ps: 479.116 ms	 c std func: 3594.876 ms	  ratio: 7.50x
 ```
 
-Don't forget : the function mm256_sincos_ps computes sinus and cosinus for the cost of one.
+Don't forget : the function mm256_sincos_ps computes sinus and cosinus for the cost of one. Also you can use the macro \_\_MATH_INTRINSINCS_FAST\_\_ 
 
 ## why AVX2 ?
 
-On multiple functions this library use a float as an int to have access to the mantissa and the exponent part. While it's doable with AVX1 using SSE4.2, I don't see the point of not using AVX2 which have been on intel CPU since 2013.
+On multiple functions this library use a float as an int to have access to the mantissa and the exponent part. While it's doable with AVX1 using SSE4.2, I don't see the point of not using AVX2 which have been on CPU since 2013.
 
 ## does it handle all float cases (+inf, -inf, NAN) as the C math lib?
 
@@ -168,3 +160,11 @@ Yes, all functions (except atan2 and pow) are compliant to +inf, -inf, NAN and o
 ## what's tested?
 
 The unit tests cover precision and special cases (inf, nan, ...). At the moment, the Neon version is not ran on GitHub but rather manually on my M1 Pro machine as I didn't had time to setup the emulator properly. 
+
+# references
+
+[cephes math library](https://github.com/jeremybarnes/cephes/blob/master/single/)
+
+[simple SSE sin/cos](http://gruntthepeon.free.fr/ssemath/)
+
+[speeding up atan2f by 50x](https://mazzo.li/posts/vectorized-atan2.html)
