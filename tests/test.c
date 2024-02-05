@@ -199,7 +199,7 @@ TEST nan_expected(float input, approximation_function function)
 
 #ifdef __MATH_INTRINSINCS_FAST__
 static const float trigo_threshold = 1.e-06f;
-static const float exp_threshold = 3.e-07f;
+static const float exp_threshold = 3.e-06f;
 static const float arc_threshold = 1.e-04f;
 static const float pow_threshold = 1.e-05f;
 static const float cbrt_threshold = 2.e-07f;

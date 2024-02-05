@@ -506,7 +506,7 @@ static inline simd_vectori simd_neg_i(simd_vectori a){return simd_sub_i(simd_spl
     simd_vector expipart = simd_cast_from_int(i);
 
     // minimax polynomial fit of 2^x, in range [-0.5, 0.5[
-    simd_vector expfpart = simd_polynomial6(fpart, (float[]) {1.8775767e-3f, 8.9893397e-3f, 5.5826318e-2f, 2.4015361e-1f, 6.9315308e-1f, 1.f});
+    simd_vector expfpart = simd_polynomial5(fpart, (float[]) {1.3534167e-2f, 5.2011464e-2f, 2.4144275e-1f, 6.9300383e-1f, 1.0000026f});
     simd_vector result = simd_mul(expipart, expfpart);
 #else
     simd_vector px = simd_floor(x);
@@ -842,8 +842,6 @@ __m256 mm256_cos_ps(__m256 x)
 
     return x;
 }
-
-static inline simd_vector reduc(simd_vector x) {return simd_mul(simd_splat(0.0625f),  simd_floor( simd_mul(simd_splat(16.f),x)));}
 
 //----------------------------------------------------------------------------------------------------------------------
 // the implementation based https://github.com/jeremybarnes/cephes/blob/master/single/powf.c is **too** slow
