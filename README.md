@@ -123,7 +123,7 @@ If you use the macro \_\_MATH_INTRINSINCS_FAST\_\_ some functions will have a bi
 * exp2, max_error : 2.674510370e-06 perf : ~1.9x
 * pow, max error : 8.886078831e-06 perf : ~1.9x
 
-Check the benchmark actions in build system for more details. As you can see, we maintained good precision with a noticeable performance boost. Most  programs could use the fast version.
+Check the benchmark actions in build system for more details. As you can see, the precision is still good with a noticeable performance boost. IMO most  programs could use the fast version.
 
 # FAQ
 
